@@ -1,5 +1,5 @@
 // Atividade Parcial 1 - Recepção e decodificação de comandos
-// Gustavo Freitas Alves
+// Gustavo Freitas Alves & Jitesh Ashok Manilal Vassaram
 
 /*
  * Função que concatena as informações recebidas e retorna o comando --> Func_recebimento
