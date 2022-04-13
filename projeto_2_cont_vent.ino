@@ -8,94 +8,72 @@
     - Verifico a velocidade e se há algum erro nesse parâmetro
 */
 
-// variavel para identificar se tem mensagem nova
-bool mens_nova = 0;
-// variável auxiliar para armazenar a string lida na Serial
-String mensagem;
+// -------------------------------------------------------------------------------
 
-// string auxiliar para obter a velocidade
-String vel_string;
+// Buffer para armazernar temporariamente os bytes lidos na serial
+byte bufferByte[8];     // maior entrada terá 8 bytes contando com o *
 
-// variavel para identificar o comando a ser executado
-int comando = 0;
+// Contador para identificar e manipular elementos no vetor buffer
+int cont_vet = 0;
 
-// Variável global para armazenamento do valor da velocidade
-int vel = 0;
+// Vetor para guardar mensagem recebida e futuramente ser entregue para o identificador
+char mensagem[7];       // maior mensagem a ser armazenada terá 7 bytes
 
-void setup(){
+// Variável para armazenar tamanho da mensagem recebida
+int tam_msg = 0;
 
-    Serial.begin(9600);
+// Variável para identificar que a mensagem foi devidamente recebida
+bool msg_recebida = 0;
+
+
+void setup() {
+  Serial.begin(9600); 
+}
+
+void loop() {
+
+    
+  // Função usada para checar se a fun_receber estava ok
+  /*
+  if(fun_receber()){
+    msg_recebida = 0;
+    for(int j=0; j<tam_msg;j++){
+      Serial.print(mensagem[j]);
+    }
+    Serial.println();
+  }
+  */
 
 }
 
-void loop(){
+// Função que retornar se a mensagem já foi recebida
+// Essa função não identifica uma mensagem sem * e ela não está preparada para usuários que inserirem + de 8 bytes
+bool fun_receber(){
+
+    // Verifico quantidade de bytes disponíveis para leitura na serial
+    while(Serial.available() > 0) {
     
-    //Func_recebimento();
-    
-}
+    // Armazeno em um buffer
+    bufferByte[cont_vet] = Serial.read();
 
+    // Verifico se o caracter lido é * (ASCII = 42)
+    if(bufferByte[cont_vet] == 42){
 
-int Func_recebimento(){
+      // Se for guardo todos os caracteres em um vetor e guardo seu tamanho
+      tam_msg = cont_vet;
+      for(int i = 0; i < tam_msg; i++){
+      	mensagem[i] = bufferByte[i];
+      }
 
-    // verifica se há dados chegando e caso tenha guardo-o
-    if(Serial.available() > 0){
-        mensagem = Serial.readString();
-        mens_nova = 1;
+      // Retorno que a mensagem foi lida e zero o contador para futuras leituras
+      msg_recebida = 1;
+      cont_vet = 0;
+      return msg_recebida;
+
+    }else{
+
+      // Avanço o contador
+      cont_vet++;
     }
-    
-    if(mens_nova){
-        if(mensagem == "EXAUST*"){
-            comando = 1;
-        }else if (mensagem == "PARA*"){
-            comando = 2;
-        }else if(mensagem == "RETVEL*"){
-            comando = 3;
-        }else if(mensagem[0] == 'V' && mensagem[1] == 'E' && mensagem[2] == 'L'){
-            comando = 4;
-        }else{
-            comando = 0;
-        }
-        mens_nova = 0;
-        mensagem = ""; 
-    }
-
-    return comando;
-}
-
-void Func_deco(int par){
-
-    // começo pela primeiro elemento que representa o valor da velocidade
-    for(int i = 4; i < 7; i++){
-        vel_string += mensagem[i];
-    }
-
-    if(vel_string == "   ");
-
-    // verifico se a velocidade está fora de escala
-    if(vel_string.toInt() > 100) comando = 5;
-
-    switch (par)
-    {
-    case 0:
-        Serial.println("ERRO: COMANDO INEXISTENTE");
-        break;
-    case 1:
-        Serial.println("OK EXAUST");
-        break;
-    case 2:
-        Serial.println("OK PARA");
-        break;
-    case 3:
-        Serial.print("OK ");
-        // tem que obter a velocidade e printar aqui
-        Serial.println(" RPM");
-        break;
-    case 4:
-        Serial.print("OK VEL ");
-        Serial.print(vel_string);
-        Serial.println("%");
-        break;
-    }
-
-
+  }
 }
