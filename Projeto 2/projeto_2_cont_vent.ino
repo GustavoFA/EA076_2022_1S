@@ -32,8 +32,9 @@ String codigo1 = "VENT";
 String codigo2 = "EXAUST";
 String codigo3 = "PARA";
 String codigo4 = "RETVEL";
-String codigo5 = "VEL " - tenho que fazer depois
+String codigo5 = "VEL ";
 
+String vel = "";
 
 void setup() {
   Serial.begin(9600); 
@@ -126,11 +127,24 @@ void fun_deco() {
             Serial.print("VEL: X RPM");
           	Serial.println();
         }
-        // Comando de velocidade - tenho que fazer
-        /*else if (codigo.substring(0, 3).equalsIgnoreCase(codigo5)) {
-            Serial.print("VEL: X RPM");
-          	Serial.println();
-        }*/
+        // Comando de velocidade - identifica os caracteres VEL 
+        else if (codigo.substring(0, 4).equalsIgnoreCase(codigo5)) {
+            /*Terminar as outras condicionais*/
+            
+            vel = codigo.substring(4, 7);
+            if (vel.toInt() == 100) {
+                Serial.print("DEU CERTO");
+          	    Serial.println();
+            }
+            if (vel = " ") {
+
+              Serial.print("Vazio");
+              Serial.println();
+            }
+            
+            //Serial.print(vel);
+          	//Serial.println();
+        }
         else {
             Serial.print("ERRO: COMANDO INEXISTENTE");
             Serial.println();
