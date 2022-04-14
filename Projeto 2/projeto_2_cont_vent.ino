@@ -26,6 +26,15 @@ int tam_msg = 0;
 bool msg_recebida = 0;
 
 
+// Strings
+
+String codigo1 = "VENT";
+String codigo2 = "EXAUST";
+String codigo3 = "PARA";
+String codigo4 = "RETVEL";
+String codigo5 = "VEL " - tenho que fazer depois
+
+
 void setup() {
   Serial.begin(9600); 
 }
@@ -43,6 +52,8 @@ void loop() {
     Serial.println();
   }
   */
+  fun_receber();
+  fun_deco();
 
 }
 
@@ -67,6 +78,7 @@ bool fun_receber(){
 
       // Retorno que a mensagem foi lida e zero o contador para futuras leituras
       msg_recebida = 1;
+      
       cont_vet = 0;
       return msg_recebida;
 
@@ -79,5 +91,50 @@ bool fun_receber(){
       // e como não há nenhum comando com mais de 8 bytes
       if(cont_vet > 7) cont_vet = 0;
     }
+    
+    fun_deco();
   }
+}
+
+void fun_deco() {
+    
+    if(msg_recebida) {
+        
+        msg_recebida = 0;
+      	String codigo = "";
+      	 
+        for(int j=0; j<tam_msg;j++){
+          //Serial.print(mensagem[j]);
+          codigo.concat(mensagem[j]);
+        }
+      	//Serial.print(codigo);
+        //Serial.println();
+        
+        if (codigo.equalsIgnoreCase(codigo1)) {
+            Serial.print("OK VENT");
+          	Serial.println();
+        }
+        else if (codigo.equalsIgnoreCase(codigo2)) {
+            Serial.print("OK EXAUST");
+          	Serial.println();
+        }
+        else if (codigo.equalsIgnoreCase(codigo3)) {
+            Serial.print("OK PARA");
+          	Serial.println();
+        }
+        else if (codigo.equalsIgnoreCase(codigo4)) {
+            Serial.print("VEL: X RPM");
+          	Serial.println();
+        }
+        // Comando de velocidade - tenho que fazer
+        /*else if (codigo.substring(0, 3).equalsIgnoreCase(codigo5)) {
+            Serial.print("VEL: X RPM");
+          	Serial.println();
+        }*/
+        else {
+            Serial.print("ERRO: COMANDO INEXISTENTE");
+            Serial.println();
+        }
+    }
+    
 }
