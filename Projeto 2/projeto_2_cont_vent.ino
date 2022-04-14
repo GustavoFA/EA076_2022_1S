@@ -47,7 +47,7 @@ void loop() {
 }
 
 // Função que retornar se a mensagem já foi recebida
-// Essa função não identifica uma mensagem sem * e ela não está preparada para usuários que inserirem + de 8 bytes
+// Essa função não identifica uma mensagem sem * 
 bool fun_receber(){
 
     // Verifico quantidade de bytes disponíveis para leitura na serial
