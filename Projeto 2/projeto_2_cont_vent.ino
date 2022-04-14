@@ -74,6 +74,10 @@ bool fun_receber(){
 
       // Avanço o contador
       cont_vet++;
+        
+      // Reseto a posição de indicação do elemento do vetor -> Faço isso, pois, se caso algum usuário inserir 8 bytes sem nenhum *
+      // e como não há nenhum comando com mais de 8 bytes
+      if(cont_vet > 7) cont_vet = 0;
     }
   }
 }
