@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2022-04-15T15:42:01.500Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36 OPR/85.0.4341.68" etag="HqA7LFkdxDMb_8KujbAL" version="17.4.3" type="github">
+<mxfile host="app.diagrams.net" modified="2022-04-15T16:13:01.783Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36 OPR/85.0.4341.68" etag="3aSdSQH5ClXQydIKgkYG" version="17.4.3" type="github">
   <diagram id="FVg58UKYC38RoSwNq8BS" name="Page-1">
     <mxGraphModel dx="997" dy="548" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -32,10 +32,10 @@
         <mxCell id="tNKsgdRQz8R3Pxd6YhrQ-12" value="Retorno Verdade para indicar que uma mensagem foi recebida" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="455.07" y="510" width="120" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="tNKsgdRQz8R3Pxd6YhrQ-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" edge="1">
+        <mxCell id="tNKsgdRQz8R3Pxd6YhrQ-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="2i5tNb66DQklGftGj8KI-10" edge="1">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="130" y="940" />
+              <mxPoint x="130" y="950" />
               <mxPoint x="130" y="300" />
             </Array>
             <mxPoint x="150" y="300" as="targetPoint" />
@@ -170,6 +170,21 @@
         </mxCell>
         <mxCell id="2i5tNb66DQklGftGj8KI-4" value="Envia a mensagem de comando inexistente" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="265.53" y="800" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="2i5tNb66DQklGftGj8KI-11" value="Não" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="2i5tNb66DQklGftGj8KI-9" target="2i5tNb66DQklGftGj8KI-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="2i5tNb66DQklGftGj8KI-15" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="2i5tNb66DQklGftGj8KI-9" target="2i5tNb66DQklGftGj8KI-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="2i5tNb66DQklGftGj8KI-9" value="O comando é o &lt;br&gt;&quot;VEL&quot;?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="457.53" y="910" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="2i5tNb66DQklGftGj8KI-10" value="Envia a mensagem correspondente à cada comando" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="257.53" y="920" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="2i5tNb66DQklGftGj8KI-14" value="O número esta no &lt;br&gt;formato &quot;xxx&quot;?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="441.29999999999995" y="1069" width="152.47" height="100" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
