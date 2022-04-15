@@ -10,7 +10,7 @@
 
 // -------------------------------------------------------------------------------
 
-// Buffer para armazernar temporariamente os bytes lidos na serial
+// Buffer para armazernar temporariamente os bytes lidos na serial  
 byte bufferByte[8];     // maior entrada terá 8 bytes contando com o *
 
 // Contador para identificar e manipular elementos no vetor buffer
@@ -76,7 +76,7 @@ bool fun_receber(){
 }
 
 // Função que decodifica a mensagem que foi enviada ao monitor, e para o caso de setar a velocidade, retorna o valor da velocidade
-void fun_deco() {
+bool fun_deco() {
     // Verifica se a variavel de sinalizacao de mensagem foi setada
     if(msg_recebida) {
         
@@ -111,7 +111,7 @@ void fun_deco() {
 
             codigo.remove(0,4); // Remove os 4 primeiros elementos do comando ('VEL '), para que seja trabalhado somente com os numeros
 
-            /* Verifica se o comando enviado esta no formato correto ('xxx'), e para isso, utiliza-se o length() para ver se o tamanho do comando
+            /* Verifica se o numero do comando enviado está no formato correto ('xxx'), e para isso, utiliza-se o length() para ver se o tamanho do comando
                enviado corresponde com o tamanho do formato desejado */
             if (codigo.length() == 3) {
                 
@@ -125,13 +125,13 @@ void fun_deco() {
                     return vel.toInt();
                 }
                 else {
-                    Serial.print("ERRO: PARÂMETRO INCORRETO");
+                    Serial.print("ERRO: PAR\302METRO INCORRETO");
                     Serial.println();
                 }
             }
             /* Caso o tamanho do comando enviado não corresponda ao tamanho desejado, é enviado a mensagem de parametro ausente */
             else {
-                Serial.print("ERRO: PARÂMETRO AUSENTE");
+                Serial.print("ERRO: PAR\302METRO AUSENTE");
                 Serial.println();
             }
         }
