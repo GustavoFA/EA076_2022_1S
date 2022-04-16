@@ -33,7 +33,6 @@ void setup() {
 
 void loop() {
 
-  fun_receber();
   fun_deco();
 
 }
@@ -76,7 +75,10 @@ bool fun_receber(){
 }
 
 // Função que decodifica a mensagem que foi enviada ao monitor, e para o caso de setar a velocidade, retorna o valor da velocidade
-bool fun_deco() {
+long fun_deco() {
+    
+    fun_receber();
+    
     // Verifica se a variavel de sinalizacao de mensagem foi setada
     if(msg_recebida) {
         
@@ -88,26 +90,26 @@ bool fun_deco() {
         }
         
         // Verifica qual comando foi escrito no monitor serial, para enviar a UART sua respectiva mensagem (de erro ou nao)
-        if (codigo.equalsIgnoreCase("VENT")) {
+        if (codigo.equals("VENT")) {
             Serial.print("OK VENT");
           	Serial.println();
         }
-        else if (codigo.equalsIgnoreCase("EXAUST")) {
+        else if (codigo.equals("EXAUST")) {
             Serial.print("OK EXAUST");
           	Serial.println();
         }
-        else if (codigo.equalsIgnoreCase("PARA")) {
+        else if (codigo.equals("PARA")) {
             Serial.print("OK PARA");
           	Serial.println();
         }
-        else if (codigo.equalsIgnoreCase("RETVEL")) {
+        else if (codigo.equals("RETVEL")) {
             Serial.print("VEL: X RPM");
           	Serial.println();
         }
         
         /* Comando de velocidade - para esse comando, é feito a identificacao do comando "VEL" atraves dos 3 primeiros elementos da variavel 'codigo'
            e, após isso, é verificado se a o numero que seta a velocidade do motor esta no formato xxx (xxx entre 000 e 100) */
-        else if (codigo.substring(0, 3).equalsIgnoreCase("VEL")) {
+        else if (codigo.substring(0, 3).equals("VEL")) {
 
             codigo.remove(0,4); // Remove os 4 primeiros elementos do comando ('VEL '), para que seja trabalhado somente com os numeros
 
@@ -129,7 +131,12 @@ bool fun_deco() {
                     Serial.println();
                 }
             }
-            /* Caso o tamanho do comando enviado não corresponda ao tamanho desejado, é enviado a mensagem de parametro ausente */
+            /* Caso o tamanho do comando enviado não corresponda ao tamanho desejado, é enviado a mensagem de parametro incorreto */
+            else if (codigo.length() < 3 && codigo.length() > 0) {
+                Serial.print("ERRO: PAR\302METRO INCORRETO");
+                Serial.println();
+            }
+            /* Caso o tamanho do numeros for 0, isto é, não foi dgitado nenhum numero, é enviado uma mensagem de parâmetro ausente*/
             else {
                 Serial.print("ERRO: PAR\302METRO AUSENTE");
                 Serial.println();
