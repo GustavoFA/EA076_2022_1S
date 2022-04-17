@@ -11,7 +11,7 @@
 // -------------------------------------------------------------------------------
 
 // Buffer para armazernar temporariamente os bytes lidos na serial  
-byte bufferByte[8];     // maior entrada terá 8 bytes contando com o *
+//byte bufferByte[8];     // maior entrada terá 8 bytes contando com o *
 
 // Contador para identificar e manipular elementos no vetor buffer
 int cont_vet = 0;
@@ -27,6 +27,10 @@ bool msg_recebida = 0;
 
 String vel = ""; // String que armazena o valor da velocidade do comando "VEL"
 
+String teste;
+String codigo = "";
+
+
 void setup() {
   Serial.begin(9600); 
 }
@@ -40,38 +44,26 @@ void loop() {
 // Função que retornar se a mensagem já foi recebida
 // Essa função não identifica uma mensagem sem * 
 bool fun_receber(){
-
+    
+    teste.reserve(8);
     // Verifico quantidade de bytes disponíveis para leitura na serial
     while(Serial.available() > 0) {
-    
-    // Armazeno em um buffer
-    bufferByte[cont_vet] = Serial.read();
-
-    // Verifico se o caracter lido é * (ASCII = 42)
-    if(bufferByte[cont_vet] == 42){
-
-      // Se for guardo todos os caracteres em um vetor e guardo seu tamanho
-      tam_msg = cont_vet;
-      for(int i = 0; i < tam_msg; i++){
-      	mensagem[i] = bufferByte[i];
-      }
-
-      // Retorno que a mensagem foi lida e zero o contador para futuras leituras
-      msg_recebida = 1;
-      
-      cont_vet = 0;
-      return msg_recebida;
-
-    }else{
-
-      // Avanço o contador
-      cont_vet++;
         
-      // Reseto a posição de indicação do elemento do vetor -> Faço isso, pois, se caso algum usuário inserir 8 bytes sem nenhum *
-      // e como não há nenhum comando com mais de 8 bytes
-      if(cont_vet > 7) cont_vet = 0;
+        teste = Serial.readString();
+        
+        if (teste.endsWith("*")) {
+            int i;
+            i = teste.lastIndexOf("*");
+            teste.remove(i);
+            codigo = teste;
+            
+            msg_recebida = 1;
+            return msg_recebida;
+        }
+        else {
+            teste.remove(0);
+        }
     }
-  }
 }
 
 // Função que decodifica a mensagem que foi enviada ao monitor, e para o caso de setar a velocidade, retorna o valor da velocidade
@@ -83,11 +75,6 @@ long fun_deco() {
     if(msg_recebida) {
         
         msg_recebida = 0; // Zera a variavel de sinalizacao antes de fazer a decodificacao
-      	String codigo = ""; 
-      	// Armazena os elementos do buffer dentro da variavel do tipo String para manipulacoes futuras
-        for(int j=0; j<tam_msg;j++){
-          codigo.concat(mensagem[j]);
-        }
         
         // Verifica qual comando foi escrito no monitor serial, para enviar a UART sua respectiva mensagem (de erro ou nao)
         if (codigo.equals("VENT")) {
