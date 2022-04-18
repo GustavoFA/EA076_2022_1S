@@ -107,20 +107,32 @@ long fun_deco() {
         else if (codigo.substring(0, 3).equalsIgnoreCase("VEL")) {
 
             codigo.remove(0,4); // Remove os 4 primeiros elementos do comando ('VEL '), para que seja trabalhado somente com os numeros
-
+			//codigo.toInt();
             /* Verifica se o numero do comando enviado está no formato correto ('xxx'), e para isso, utiliza-se o length() para ver se o tamanho do comando
                enviado corresponde com o tamanho do formato desejado */
             if (codigo.length() == 3) {
                 
-                vel = codigo;
-                if (vel.toInt() >= 0 && vel.toInt() <= 100) {
-                    Serial.print("OK VEL ");
-                    Serial.print(vel);
-                    Serial.print("%");
-                    Serial.println();
+                vel = codigo; // Guarda os numeros em uma outra variavel STRING, que sera manipulada
+                
+                /* Verifica se o codigo enviado é realmente um numero */
+                if (isdigit(vel[0]) && isdigit(vel[1]) && isdigit(vel[2])) {
                     
-                    return vel.toInt();
+                    /* Verifica se o numero esta dentro do limite de 000 a 100 e retorna o seu valor inteiro */
+                    if (vel.toInt() >= 0 && vel.toInt() <= 100) {
+                        Serial.print("OK VEL ");
+                        Serial.print(vel);
+                        Serial.print("%");
+                        Serial.println();
+                        
+                        return vel.toInt();
+                    }
+                    /* Caso contrario, envia a mensagem de parametro incorreto */
+                    else {
+                        Serial.print("ERRO: PAR\302METRO INCORRETO");
+                        Serial.println();
+                    }
                 }
+                /* Caso contrario, envia a mensagem de parametro incorreto*/
                 else {
                     Serial.print("ERRO: PAR\302METRO INCORRETO");
                     Serial.println();
