@@ -1,12 +1,6 @@
 // Atividade Parcial 1 - Recepção e decodificação de comandos
 // Gustavo Freitas Alves & Jitesh Ashok Manilal Vassaram
 
-/*
- * Função que concatena as informações recebidas e retorna o comando --> Func_recebimento
-    - Apenas checo o comando recebido e se há algum erro
- * Função que decodifica o comando e envia a resposta via Serial --> Func_deco
-    - Verifico a velocidade e se há algum erro nesse parâmetro
-*/
 
 // -------------------------------------------------------------------------------
 
@@ -22,8 +16,6 @@ char mensagem[7];       // maior mensagem a ser armazenada terá 7 bytes
 // Variável para armazenar tamanho da mensagem recebida
 int tam_msg = 0;
 
-// Variável para identificar que a mensagem foi devidamente recebida
-bool msg_recebida = 0;
 
 String vel = ""; // String que armazena o valor da velocidade do comando "VEL"
 
@@ -59,9 +51,8 @@ bool fun_receber(){
       }
 
       // Retorno que a mensagem foi lida e zero o contador para futuras leituras
-      msg_recebida = 1;
       cont_vet = 0;
-      return msg_recebida;
+      return 1;
 
     }else{
 
@@ -71,6 +62,9 @@ bool fun_receber(){
       // Reseto a posição de indicação do elemento do vetor -> Faço isso, pois, se caso algum usuário inserir 8 bytes sem nenhum *
       // e como não há nenhum comando com mais de 8 bytes
       if(cont_vet > 7) cont_vet = 0;
+
+      // Retorno que a mensagem ainda não foi recebida (precisa do * para saber identificar que uma mensagem chegou)
+      return 0;
     }
   }
     
@@ -79,12 +73,11 @@ bool fun_receber(){
 // Função que decodifica a mensagem que foi enviada ao monitor, e para o caso de setar a velocidade, retorna o valor da velocidade
 long fun_deco() {
     
-    fun_receber();
+    
     
     // Verifica se a variavel de sinalizacao de mensagem foi setada
-    if(msg_recebida) {
+    if(fun_receber()) {
         
-        msg_recebida = 0; // Zera a variavel de sinalizacao antes de fazer a decodificacao
       	String codigo = ""; 
       	// Armazena os elementos do buffer dentro da variavel do tipo String para manipulacoes futuras
         for(int j=0; j<tam_msg;j++){
