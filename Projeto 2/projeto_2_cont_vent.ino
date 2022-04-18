@@ -85,28 +85,33 @@ long fun_deco() {
     if(msg_recebida) {
         
         msg_recebida = 0; // Zera a variavel de sinalizacao antes de fazer a decodificacao
+      	String codigo = ""; 
+      	// Armazena os elementos do buffer dentro da variavel do tipo String para manipulacoes futuras
+        for(int j=0; j<tam_msg;j++){
+          codigo.concat(mensagem[j]);
+        }
         
         // Verifica qual comando foi escrito no monitor serial, para enviar a UART sua respectiva mensagem (de erro ou nao)
-        if (codigo.equals("VENT")) {
+        if (codigo.equalsIgnoreCase("VENT")) {
             Serial.print("OK VENT");
           	Serial.println();
         }
-        else if (codigo.equals("EXAUST")) {
+        else if (codigo.equalsIgnoreCase("EXAUST")) {
             Serial.print("OK EXAUST");
           	Serial.println();
         }
-        else if (codigo.equals("PARA")) {
+        else if (codigo.equalsIgnoreCase("PARA")) {
             Serial.print("OK PARA");
           	Serial.println();
         }
-        else if (codigo.equals("RETVEL")) {
+        else if (codigo.equalsIgnoreCase("RETVEL")) {
             Serial.print("VEL: X RPM");
           	Serial.println();
         }
         
         /* Comando de velocidade - para esse comando, é feito a identificacao do comando "VEL" atraves dos 3 primeiros elementos da variavel 'codigo'
            e, após isso, é verificado se a o numero que seta a velocidade do motor esta no formato xxx (xxx entre 000 e 100) */
-        else if (codigo.substring(0, 3).equals("VEL")) {
+        else if (codigo.substring(0, 3).equalsIgnoreCase("VEL")) {
 
             codigo.remove(0,4); // Remove os 4 primeiros elementos do comando ('VEL '), para que seja trabalhado somente com os numeros
 
