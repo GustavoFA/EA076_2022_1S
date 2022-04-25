@@ -8,7 +8,7 @@
 
 long int n = 0; // variavel de contagem de variacao de nivel logico
 volatile unsigned char cont = 0; // variavel de contagem do temporizador
-unsigned int rpm = 0;
+unsigned int rpm = 0; // Variavel utilizada para o calculo da frequência de rotação
 
 /* rotina de servico de interrupcao que eh executada toda vez ha mudanca de 
 estado e que mede a quantidade de vezes que essa interrupcao foi chamada */
@@ -20,6 +20,7 @@ ISR (PCINT1_vect) {
     n++;
 }
 
+// Definir os registradores do PIN CHANGE PCMSK e PCICR (ver atividade 4 - EA871) - 
 void setup(){
 
     cli(); // desabilita as interrupcoes
@@ -28,9 +29,9 @@ void setup(){
     PCMSK1 |= 0x01; // Habilita o disparo das interrupcoes
     sei(); // Habilita as interrupcoes
 
-    pinMode(A0, INPUT); // Pino A0 como entrada
+  	pinMode(A0, INPUT); // Pino A0 como entrada
 
-    Serial.begin(9600); // Inicializo o Serial
+    Serial.begin(9600); // Inicializa o temporizador
  
 }
 
@@ -38,18 +39,23 @@ void frequencia(void) {
 
     // Passado o 1s, é calculado a estimativa da frequência de rotação
     if (cont>=125) {
-        rpm = 60*((n/2))/(60);
-        Serial.print(rpm);
-        Serial.println();
-        n = 0;
-      	cont = 0;
+
+      /* Para calcular a frequência de rotação do motor, utiliza-se a seguinte fórmula, 
+         f_rpm = 60*(numero de pulsos/numero de pulsos por volta), onde o numero de pulsos é dado por n/2 (já que 
+         o n é incrementado a cada variação de nível lógico), o numero de pulsos por volta é dado pelo encoder utilizado,
+         e o 60 é utilizado para converter de Hz para rpm */
+      rpm = 60*((n/2))/(60);
+      Serial.print(rpm);
+      Serial.println();
+      n = 0;
+      cont = 0;
     }
 }
 
 void loop(){
-
-    _delay_ms(1);
-    frequencia();
+  
+  _delay_ms(1);
+  frequencia();
   
 }
 
