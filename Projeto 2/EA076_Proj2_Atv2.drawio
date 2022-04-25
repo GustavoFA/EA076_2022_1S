@@ -1,9 +1,37 @@
-<mxfile host="app.diagrams.net" modified="2022-04-25T18:47:44.791Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36 OPR/85.0.4341.72" etag="xglE9EkUOH7ziZOskCQP" version="17.4.5" type="github">
+<mxfile host="app.diagrams.net" modified="2022-04-25T19:03:43.297Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36 OPR/85.0.4341.72" etag="JCTBNaE-wAvEEQp-b7GW" version="17.4.5" type="github">
   <diagram id="Xcpq7M3L-aQAkDpajzJv" name="Page-1">
     <mxGraphModel dx="997" dy="548" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
+        <mxCell id="r9Vvt1rc18INHcRU7sG7-4" value="Sim" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="r9Vvt1rc18INHcRU7sG7-2" target="r9Vvt1rc18INHcRU7sG7-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r9Vvt1rc18INHcRU7sG7-8" value="Não" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="r9Vvt1rc18INHcRU7sG7-2" target="r9Vvt1rc18INHcRU7sG7-2">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="125" y="260" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="125" y="40" />
+              <mxPoint x="30" y="40" />
+              <mxPoint x="30" y="110" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r9Vvt1rc18INHcRU7sG7-2" value="&lt;span&gt;Contador do timer 0 deu 125 (125*8ms=1s)?&lt;/span&gt;" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="60" width="150" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="r9Vvt1rc18INHcRU7sG7-6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="r9Vvt1rc18INHcRU7sG7-3" target="r9Vvt1rc18INHcRU7sG7-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r9Vvt1rc18INHcRU7sG7-3" value="Calcula a frequência de rotação através do número de variações de nível lógico" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="75" width="145" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="r9Vvt1rc18INHcRU7sG7-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="r9Vvt1rc18INHcRU7sG7-5" target="r9Vvt1rc18INHcRU7sG7-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r9Vvt1rc18INHcRU7sG7-5" value="Printa o valor da frequência de rotação no monitor serial" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="537.5" y="80" width="120" height="60" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
