@@ -20,7 +20,6 @@ ISR (PCINT1_vect) {
     n++;
 }
 
-// Definir os registradores do PIN CHANGE PCMSK e PCICR (ver atividade 4 - EA871) - 
 void setup(){
 
     cli(); // desabilita as interrupcoes
@@ -29,9 +28,9 @@ void setup(){
     PCMSK1 |= 0x01; // Habilita o disparo das interrupcoes
     sei(); // Habilita as interrupcoes
 
-  	pinMode(A0, INPUT); // Pino A0 como entrada
+    pinMode(A0, INPUT); // Pino A0 como entrada
 
-    Serial.begin(9600); // Inicializa o temporizador
+    Serial.begin(9600); // Inicializo o Serial
  
 }
 
@@ -49,7 +48,7 @@ void frequencia(void) {
 
 void loop(){
 
-	_delay_ms(1);
+    _delay_ms(1);
     frequencia();
   
 }
