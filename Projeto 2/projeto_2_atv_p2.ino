@@ -44,7 +44,9 @@ void frequencia(void) {
          f_rpm = 60*(numero de pulsos/numero de pulsos por volta), onde o numero de pulsos é dado por n/2 (já que 
          o n é incrementado a cada variação de nível lógico), o numero de pulsos por volta é dado pelo encoder utilizado,
          e o 60 é utilizado para converter de Hz para rpm */
-      rpm = 60*((n/2))/(60);
+      rpm = 60*((n/2))/(60);  // Para o simulador
+      // rpm = 60*((n/2))/(2);   // Para o circuito original
+       
       Serial.print(rpm);
       Serial.println();
       n = 0;
