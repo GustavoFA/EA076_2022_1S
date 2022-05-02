@@ -39,6 +39,7 @@ void conf_PWM(){
 
 void setup(){
 
+    Serial.begin(9600);
 
     // Configuração das GPIOs PD
     DDRD |= 0x1C;   // Saídas PD2, PD3 e PD4
@@ -52,10 +53,38 @@ void setup(){
 
 }
 
+// Função para inserir tipo de movimento e tensão média (PWM)
+void motor(char mov, int pwm){
 
+    switch (mov)
+    {
+    // Paro o movimento dos motores
+    PORTD &= ~0x14;
+    case 'p':
+        // Mantenho parado
+        break;
+    
+    case 'a':
+        // Movimento horário
+        PORTD |= 0x04;
+        break;
+
+    case 'h':
+        // Movimento anti-horário
+        PORTD |= 0x10;
+        break;
+    }
+
+    // Faixa de comparação: 0 --> 255
+    // PWM: 0 --> 100 %
+    // 1% = 25.5 
+    OCR2B = (int) pwm*(25.5);
+
+}
 
 void loop(){
 
-    // Insira algum valor em OCR2B para modificar o PWM e o nível de PD2 e PD4 para selecionar movimento
+    // Teste do funcionamento
+    motor('a', 50);
 
 }
