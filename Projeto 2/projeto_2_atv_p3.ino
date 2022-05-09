@@ -51,7 +51,9 @@ void setup(){
     
     /* Definicao do numero de linhas e colunas do LCD */
   	lcd.begin(16,2);
- 
+  	//Inicio o LCD com ele apagado
+ 	lcd.clear();
+	
 }
 
 void frequencia(void) {
@@ -65,14 +67,24 @@ void frequencia(void) {
         o n é incrementado a cada variação de nível lógico), o numero de pulsos por volta é dado pelo encoder utilizado,
         e o 60 é utilizado para converter de Hz para rpm */
     rpm = 60*((n/2))/(60);
+  
     
-    lcd.clear(); // a cada contagem, a tela é limpada para atualizar o valor da estimativa da frequência
+    //lcd.clear(); // a cada contagem, a tela é limpada para atualizar o valor da estimativa da frequência
   	lcd.setCursor(0,0); // Coloca o cursor na linha 0, coluna 0
-  	lcd.print("Frequencia"); 
-  	lcd.setCursor(3,1); // Coloca o cursor na linha 1, coluna 3
+  	lcd.print("Frequencia:"); 
+    
+    // Condições para iniciar o cursor com base na quantidade de digitos que tem o valor de RPM
+    if(rpm >= 1000) {
+      lcd.setCursor(0,1);
+    }else if(rpm >= 100){
+      lcd.setCursor(1,1);
+    }else{
+      lcd.setCursor(2,1);
+    }
+    
   	lcd.print(rpm); // escreve no display o valor da estimativa da frequencia
-  	lcd.setCursor(7,1); // coloca o cursor na linha 1, coluna 7
-  	lcd.print("rpm"); // unidade da estimativa
+  	lcd.setCursor(5,1); // coloca o cursor na linha 1, coluna 7
+  	lcd.print("RPM"); // unidade da estimativa
 
     n = 0;
     cont = 0;
