@@ -49,37 +49,91 @@ void setup(){
 
 // Funcao de multiplexacao dos 4 displays (a cada 1/120 segundos (8,33 ms) um display fica ligado e outro desligado e fica alternando) - é utilizado uma maquina de estados de 2 estados
 void multiplexDisplay() {
-  
-  
-  if ((estadoMultiplex == 0) && (contDisplay >=2)) {
-    estadoMultiplex = 1;
-    
-    contDisplay = 0; // Zera a contagem dessa variavel de contagem da multiplexacao
-    
-  }
-  
-  if ((estadoMultiplex == 0) && (contDisplay < 2)) {
-    estadoMultiplex = 0;
-  }
-	
-  // Estado 1 para o estado 0 - 
-  if ((estadoMultiplex == 1) && (contDisplay >= 2)) {
-    estadoMultiplex = 0;
-    contDisplay = 0; // Zera a contagem dessa variavel de contagem da multiplexacao
+
+    switch (estadoMultiplex)
+    {
+    case 0:
+        /* Mudanca de estado apos o 8ms */
+        if (contDisplay >= 2) {
+            estadoMultiplex = 1;
+            contDisplay = 0;
+        }
+        /* Caso contrario, permanece no mesmo estado */
+        else {
+            estadoMultiplex = 0;
+            Wire.beginTransmission(32);
+            Wire.write(224); // Liga o display do milhar (P4 = 0, P5=P6=P7=1
+            Wire.endTransmission();
+            Wire.beginTransmission(32);
+            Wire.write(m); // mostra o numero da variavel 'm'
+            Wire.endTransmission();
+        }
+        //break;
     
 
-  }
-  // caso nao chegue em 16ms, permanece no mesmo estado (display carro ligado e display pedestre desligado)
-  if ((estadoMultiplex == 1) && (contDisplay < 2)) {
-    estadoMultiplex = 1;
-  }
+    case 1:
+        /* Mudanca de estado apos o 8ms */
+        if (contDisplay >= 2) {
+            estadoMultiplex = 2;
+            contDisplay = 0;
+        }
+        /* Caso contrario, permanece no mesmo estado */
+        else {
+            estadoMultiplex = 1;
+            Wire.beginTransmission(32);
+            Wire.write(208); // Liga o display da centena (P5 = 0, P4=P6=P7=1)
+            Wire.endTransmission();
+            Wire.beginTransmission(32);
+            Wire.write(c); // mostra o numero da variavel 'c'
+            Wire.endTransmission();
+        }
+        //break;
+    
+    case 2:
+        /* Mudanca de estado apos o 8ms */
+        if (contDisplay >= 2) {
+            estadoMultiplex = 3;
+            contDisplay = 0;
+        }
+        /* Caso contrario, permanece no mesmo estado */
+        else {
+            estadoMultiplex = 2;
+            Wire.beginTransmission(32);
+            Wire.write(176); // Liga o display da dezena (P6 = 0, P5=P4=P7=1)
+            Wire.endTransmission();
+            Wire.beginTransmission(32);
+            Wire.write(d); // mostra o numero da variavel 'd'
+            Wire.endTransmission();
+        }
+        //break;
+    
+    case 3:
+        /* Mudanca de estado apos o 8ms */
+        if (contDisplay >= 2) {
+            estadoMultiplex = 0; // Volta para o inicio da Maquina de estados
+            contDisplay = 0;
+        }
+        /* Caso contrario, permanece no mesmo estado */
+        else {
+            estadoMultiplex = 3;
+            Wire.beginTransmission(32);
+            Wire.write(112); // Liga o display da unidade (P7 = 0, P5=P6=P4=1)
+            Wire.endTransmission();
+            Wire.beginTransmission(32);
+            Wire.write(u); // mostra o numero da variavel 'u'
+            Wire.endTransmission();
+        }
+        //break;
+    }
+  
+  
 }
 
 void frequencia(void) {
   
   
   // Passado o 1s, é calculado a estimativa da frequência de rotação
-  if (cont>=125) {
+  if (cont>=250) {
 
     /* Para calcular a frequência de rotação do motor, utiliza-se a seguinte fórmula, 
         f_rpm = 60*(numero de pulsos/numero de pulsos por volta), onde o numero de pulsos é dado por n/2 (já que 
@@ -90,16 +144,13 @@ void frequencia(void) {
     m = rpm / 1000;
     c = (rpm - 1000*m) / 100;
     d = (rpm - 1000*m - 100*c) / 10;
-    u = (rpm - 1000*m - 100*c - 10*d);
-
-
-    /*Wire.beginTransmission(32);
-    Wire.write(rpm, 4);
-    Wire.endTransmission();*/
-    
+    u = (rpm - 1000*m - 100*c - 10*d);   
+    /*Serial.print(rpm);
+    Serial.println();*/
 
     n = 0;
     cont = 0;
+    multiplexDisplay();
   }
 }
 
@@ -116,7 +167,7 @@ void configuracao_Timer0(){
   // Relogio = 16e6 Hz
   // Prescaler = 1024
   // Faixa = 125 (contagem de 0 a OCR0A = 124)
-  // Intervalo entre interrupcoes: (Prescaler/Relogio)*Faixa = (64/16e6)*(124+1) = 0.008s
+  // Intervalo entre interrupcoes: (Prescaler/Relogio)*Faixa = (256/16e6)*(249+1) = 0.004s
 
   // TCCR0A – Timer/Counter Control Register A
   // COM0A1 COM0A0 COM0B1 COM0B0 – – WGM01 WGM00
@@ -124,7 +175,7 @@ void configuracao_Timer0(){
   TCCR0A = 0x02;
 
   // OCR0A – Output Compare Register A
-  OCR0A = 124;
+  OCR0A = 249;
 
   // TIMSK0 – Timer/Counter Interrupt Mask Register
   // – – – – – OCIE0B OCIE0A TOIE0
@@ -133,8 +184,8 @@ void configuracao_Timer0(){
 
   // TCCR0B – Timer/Counter Control Register B
   // FOC0A FOC0B – – WGM02 CS02 CS01 CS0
-  // 0     0         0     1    0    1
-  TCCR0B = 0x05;
+  // 0     0         0     1    0    0
+  TCCR0B = 0x04;
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
