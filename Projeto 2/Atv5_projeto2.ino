@@ -109,7 +109,7 @@ void multiplexDisplay() {
             estadoMultiplex = 3;
             Wire.beginTransmission(32);
             Wire.write(7); // Liga o display da unidade (P7 = 0, P5=P6=P4=1)
-            Wire.endTransmission();
+          	Wire.endTransmission();
         }
         break;
     }
