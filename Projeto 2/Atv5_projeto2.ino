@@ -54,7 +54,7 @@ void multiplexDisplay() {
     {
     case 0:
         /* Mudanca de estado apos o 8ms */
-        if (contDisplay >= 2) {
+        if (contDisplay >= 1) {
             estadoMultiplex = 1;
             contDisplay = 0;
         }
@@ -62,7 +62,7 @@ void multiplexDisplay() {
         else {
             estadoMultiplex = 0;
             Wire.beginTransmission(32);
-            Wire.write(224); // Liga o display do milhar (P4 = 0, P5=P6=P7=1
+            Wire.write(14); // Liga o display do milhar (P4 = 0, P5=P6=P7=1
             Wire.endTransmission();
         }
         break;
@@ -70,7 +70,7 @@ void multiplexDisplay() {
 
     case 1:
         /* Mudanca de estado apos o 8ms */
-        if (contDisplay >= 2) {
+        if (contDisplay >= 1) {
             estadoMultiplex = 2;
             contDisplay = 0;
         }
@@ -78,14 +78,14 @@ void multiplexDisplay() {
         else {
             estadoMultiplex = 1;
             Wire.beginTransmission(32);
-            Wire.write(208); // Liga o display da centena (P5 = 0, P4=P6=P7=1)
+            Wire.write(13); // Liga o display da centena (P5 = 0, P4=P6=P7=1)
             Wire.endTransmission();
         }
         break;
     
     case 2:
         /* Mudanca de estado apos o 8ms */
-        if (contDisplay >= 2) {
+        if (contDisplay >= 1) {
             estadoMultiplex = 3;
             contDisplay = 0;
         }
@@ -93,14 +93,14 @@ void multiplexDisplay() {
         else {
             estadoMultiplex = 2;
             Wire.beginTransmission(32);
-            Wire.write(176); // Liga o display da dezena (P6 = 0, P5=P4=P7=1)
+            Wire.write(11); // Liga o display da dezena (P6 = 0, P5=P4=P7=1)
             Wire.endTransmission();
         }
         break;
     
     case 3:
         /* Mudanca de estado apos o 8ms */
-        if (contDisplay >= 2) {
+        if (contDisplay >= 1) {
             estadoMultiplex = 0; // Volta para o inicio da Maquina de estados
             contDisplay = 0;
         }
@@ -108,7 +108,7 @@ void multiplexDisplay() {
         else {
             estadoMultiplex = 3;
             Wire.beginTransmission(32);
-            Wire.write(112); // Liga o display da unidade (P7 = 0, P5=P6=P4=1)
+            Wire.write(7); // Liga o display da unidade (P7 = 0, P5=P6=P4=1)
             Wire.endTransmission();
         }
         break;
@@ -150,8 +150,8 @@ void frequencia(void) {
 
 	
     // Passado o 1s, é calculado a estimativa da frequência de rotação
-    if (cont>=250) {
-
+    if (cont>=125) {
+		visor();
         /* Para calcular a frequência de rotação do motor, utiliza-se a seguinte fórmula, 
             f_rpm = 60*(numero de pulsos/numero de pulsos por volta), onde o numero de pulsos é dado por n/2 (já que 
             o n é incrementado a cada variação de nível lógico), o numero de pulsos por volta é dado pelo encoder utilizado,
@@ -164,11 +164,11 @@ void frequencia(void) {
         u = (rpm - 1000*m - 100*c - 10*d);   
         /*Serial.print(rpm);
         Serial.println();*/
-
+		
         n = 0;
         cont = 0;
     }
-  	visor();
+  	
 }
 
 void loop(){
@@ -185,7 +185,7 @@ void configuracao_Timer0(){
     // Relogio = 16e6 Hz
     // Prescaler = 1024
     // Faixa = 125 (contagem de 0 a OCR0A = 124)
-    // Intervalo entre interrupcoes: (Prescaler/Relogio)*Faixa = (256/16e6)*(249+1) = 0.004s
+    // Intervalo entre interrupcoes: (Prescaler/Relogio)*Faixa = (1024/16e6)*(124+1) = 0.008s
 
     // TCCR0A – Timer/Counter Control Register A
     // COM0A1 COM0A0 COM0B1 COM0B0 – – WGM01 WGM00
@@ -193,7 +193,7 @@ void configuracao_Timer0(){
     TCCR0A = 0x02;
 
     // OCR0A – Output Compare Register A
-    OCR0A = 249;
+    OCR0A = 124;
 
     // TIMSK0 – Timer/Counter Interrupt Mask Register
     // – – – – – OCIE0B OCIE0A TOIE0
@@ -202,8 +202,8 @@ void configuracao_Timer0(){
 
     // TCCR0B – Timer/Counter Control Register B
     // FOC0A FOC0B – – WGM02 CS02 CS01 CS0
-    // 0     0         0     1    0    0
-    TCCR0B = 0x04;
+    // 0     0         0     1    0    1
+    TCCR0B = 0x05;
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
