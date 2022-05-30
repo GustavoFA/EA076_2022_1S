@@ -1,10 +1,10 @@
-<mxfile host="app.diagrams.net" modified="2022-05-30T19:49:44.926Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36 OPR/86.0.4363.64" etag="cNxNSXkNlreyudC5Swxw" version="18.0.2" type="github">
+<mxfile host="app.diagrams.net" modified="2022-05-30T20:15:02.085Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36 OPR/86.0.4363.64" etag="Qp5p_O-7OYWrR6piCw58" version="18.0.2" type="github">
   <diagram id="QOHIH6I0N327gtCGKKCE" name="Page-1">
-    <mxGraphModel dx="997" dy="548" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="906" dy="498" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="rgNIp-C62M6QFqX7Mvbm-3" value="t &amp;gt; 8ms" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=12;" parent="1" source="rgNIp-C62M6QFqX7Mvbm-1" target="rgNIp-C62M6QFqX7Mvbm-2" edge="1">
+        <mxCell id="rgNIp-C62M6QFqX7Mvbm-3" value="t &amp;gt; 4ms" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=12;" parent="1" source="rgNIp-C62M6QFqX7Mvbm-1" target="rgNIp-C62M6QFqX7Mvbm-2" edge="1">
           <mxGeometry y="-10" relative="1" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
@@ -12,7 +12,7 @@
         <mxCell id="rgNIp-C62M6QFqX7Mvbm-1" value="Estado 0 -&lt;br&gt;ativa o display da unidade, desliga os outros e manda o dígito correspondente da frequência" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="144" y="160" width="140" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="rgNIp-C62M6QFqX7Mvbm-5" value="t &amp;gt; 8ms" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=12;" parent="1" source="rgNIp-C62M6QFqX7Mvbm-2" target="rgNIp-C62M6QFqX7Mvbm-4" edge="1">
+        <mxCell id="rgNIp-C62M6QFqX7Mvbm-5" value="t &amp;gt; 4ms" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=12;" parent="1" source="rgNIp-C62M6QFqX7Mvbm-2" target="rgNIp-C62M6QFqX7Mvbm-4" edge="1">
           <mxGeometry y="-10" relative="1" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
@@ -20,7 +20,7 @@
         <mxCell id="rgNIp-C62M6QFqX7Mvbm-2" value="Estado 1 -&lt;br&gt;ativa o display da dezena, desliga os outros e manda o dígito correspondente da frequência" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="344" y="160" width="140" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="rgNIp-C62M6QFqX7Mvbm-7" value="t &amp;gt; 8ms" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=12;" parent="1" source="rgNIp-C62M6QFqX7Mvbm-4" target="rgNIp-C62M6QFqX7Mvbm-6" edge="1">
+        <mxCell id="rgNIp-C62M6QFqX7Mvbm-7" value="t &amp;gt; 4ms" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=12;" parent="1" source="rgNIp-C62M6QFqX7Mvbm-4" target="rgNIp-C62M6QFqX7Mvbm-6" edge="1">
           <mxGeometry x="-0.0323" y="30" relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="614" y="450" />
@@ -31,7 +31,7 @@
         <mxCell id="rgNIp-C62M6QFqX7Mvbm-4" value="Estado 2 -&lt;br&gt;ativa o display da centena, desliga os outros e manda o dígito correspondente da frequência" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="544" y="160" width="140" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="rgNIp-C62M6QFqX7Mvbm-8" value="t &amp;gt; 8ms" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontSize=12;" parent="1" source="rgNIp-C62M6QFqX7Mvbm-6" target="rgNIp-C62M6QFqX7Mvbm-1" edge="1">
+        <mxCell id="rgNIp-C62M6QFqX7Mvbm-8" value="t &amp;gt; 4ms" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontSize=12;" parent="1" source="rgNIp-C62M6QFqX7Mvbm-6" target="rgNIp-C62M6QFqX7Mvbm-1" edge="1">
           <mxGeometry x="0.1515" y="20" relative="1" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
