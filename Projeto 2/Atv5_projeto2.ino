@@ -20,7 +20,7 @@ bool troca = 1; // variável auxiliar para comunição I2C ocorrer a cada interr
 
 void setup(){
 
-    configuracao_Timer0(); // Configura o temporizador
+    configuracao_Timer0(); // Configura o temporizador Timer 0
 
     pinMode(A0, INPUT); // Pino A0 como entrada
     
@@ -39,8 +39,7 @@ void setup(){
 
 void loop(){
 
-    _delay_ms(1);
-    
+    // Mudança do display e seu valor só ocorrerá a cada interrupção do temporizador, no caso 4 ms, isso está relacionado à variável troca
     if(troca) visor(u, d, c, m);
 
 }
@@ -52,22 +51,22 @@ void visor(int x, int y, int w, int z ){
     {
     case 0:
         Wire.beginTransmission(32);
-        Wire.write(112 + x);
+        Wire.write(112 + x);  // Display da unidade ligado + valor da unidade
         Wire.endTransmission();
         break;
     case 1:
         Wire.beginTransmission(32);
-        Wire.write(176 + y);
+        Wire.write(176 + y);  // Display da dezena ligado + valor da dezena
         Wire.endTransmission(); 
         break;
     case 2:
         Wire.beginTransmission(32);
-        Wire.write(208 + w);
+        Wire.write(208 + w);  // Display da centena ligado + valor da centena
         Wire.endTransmission();
         break;
     case 3:
         Wire.beginTransmission(32);
-        Wire.write(224 + z);
+        Wire.write(224 + z);  // Display do milhar ligado + valor do milhar
         Wire.endTransmission();
         break;
     }
