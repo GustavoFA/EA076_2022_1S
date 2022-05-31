@@ -7,7 +7,7 @@
 /*
 
     * Visor -> Tem a função, é só passar os algarismos para ela representar
-    * Motor -> Tem a função. Lembrando que ela deve ser chamada e passar os parâmetros para a mesma
+    * Motor -> Tem a função. Lembrando que ela deve ser chamada pela função de recebimento/decodificação do comando
     * Encoder -> Tem a função, que estima a frequência e separa os algarismos
 
 */
@@ -18,7 +18,6 @@
 #include <Wire.h>
 
 // ----- Visor 7 segmentos -----
-unsigned int rpm = 3210; // Variavel utilizada para o calculo da frequência de rotação
 unsigned int contDisplay = 0;      // Variavel de contagem utilizado para a multiplexacao dos displays de pedestre e de carros, fica intercalando entre um estado e outro a cada 16ms
 
 // algarismos de unidade, dezena, centena e milhar
@@ -66,7 +65,7 @@ void loop(){
 
 }
 
-//
+
 // Função para inserir tipo de movimento e tensão média (PWM)
 void motor(char mov, int PWM){
 
