@@ -33,6 +33,8 @@ bool troca = 1; // variável auxiliar para comunição I2C ocorrer a cada interr
 long int n = 0; // variavel de contagem de variacao de nivel logico
 volatile unsigned char cont = 0; // variavel de contagem do temporizador
 unsigned int rpm = 0; // Variavel utilizada para o calculo da frequência de rotação
+
+char movimento; // variavel de controle do sentido e movimento do motor
 // --------------------------
 
 // ---- Display 16x2 ----
@@ -264,15 +266,15 @@ long fun_deco() {
         
         // Verifica qual comando foi escrito no monitor serial, para enviar a UART sua respectiva mensagem (de erro ou nao)
         if (codigo.equalsIgnoreCase("VENT")) {
-            
+            movimento = a;
             lcd.print("OK VENT"); 
         }
         else if (codigo.equalsIgnoreCase("EXAUST")) {
-            
+            movimento = h;
             lcd.print("OK EXAUST"); 
         }
         else if (codigo.equalsIgnoreCase("PARA")) {
-            
+            movimento = p;
             lcd.print("OK PARA"); 
         }
         else if (codigo.equalsIgnoreCase("RETVEL")) {
@@ -340,6 +342,9 @@ long fun_deco() {
             lcd.print("ERRO: COMANDO INEXISTENTE")
         }
     } 
+
+    motor(movimento, vel); // Chama a funcao que controla o sentido e a valocidade do motor
+    
 }
 
 // Temporizador de 4 ms
