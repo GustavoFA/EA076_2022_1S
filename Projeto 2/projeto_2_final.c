@@ -8,10 +8,10 @@
     * Visor -> Tem a função, é só passar os algarismos para ela representar
     * Motor -> Tem a função. Lembrando que ela deve ser chamada pela função de recebimento/decodificação do comando
     * Encoder -> Tem a função, que estima a frequência e separa os algarismos
+    * fun_receber e fun_deco -> Funcoes que decodificam os comandos
 */
 
 // Usamos Timer 0 -> 4 ms
-
 
 #include <Wire.h>
 #include <LiquidCrystal.h>
@@ -110,11 +110,11 @@ void setup(){
 void loop(){
 
     // Obtenção da frequência
-    frequencia();
+    //frequencia();
 
     // Mudança do display e seu valor só ocorrerá a cada interrupção do temporizador, no caso 4 ms, isso está relacionado à variável troca
-    if(troca) visor(u, d, c, m);
-
+    //if(troca) visor(u, d, c, m);
+	_delay_ms(1);
     fun_deco();
 
 }
@@ -257,7 +257,7 @@ long fun_deco() {
     // Verifica se a variavel de sinalizacao de mensagem foi setada
     if(fun_receber()) {
         
-        lcd.setCursor(0,0) // Cursor na coluna 0 e linha 0
+        lcd.setCursor(0,0); // Cursor na coluna 0 e linha 0
       	String codigo = ""; 
       	// Armazena os elementos do buffer dentro da variavel do tipo String para manipulacoes futuras
         for(int j=0; j<tam_msg;j++){
@@ -266,23 +266,36 @@ long fun_deco() {
         
         // Verifica qual comando foi escrito no monitor serial, para enviar a UART sua respectiva mensagem (de erro ou nao)
         if (codigo.equalsIgnoreCase("VENT")) {
-            movimento = a;
+            movimento = 'a';
             lcd.print("OK VENT"); 
         }
         else if (codigo.equalsIgnoreCase("EXAUST")) {
-            movimento = h;
+            movimento = 'h';
             lcd.print("OK EXAUST"); 
         }
         else if (codigo.equalsIgnoreCase("PARA")) {
-            movimento = p;
+            movimento = 'p';
+          	//lcd.setCursor(0,0);
             lcd.print("OK PARA"); 
+          	Serial.print("OK PARA");
+          	Serial.println();
         }
         else if (codigo.equalsIgnoreCase("RETVEL")) {
             
             lcd.print("VEL: ");
-            lcd.setCursor(4,1);
+            lcd.setCursor(5,0);
             lcd.print(rpm);    // coloca o valor da velocidade no instante
-            lcd.setCursor(8,1);
+            if(rpm >= 1000) {
+                lcd.setCursor(10,0);
+            }else if(rpm >= 100){
+                lcd.setCursor(9,0);
+            }else if(rpm >= 10){
+                lcd.setCursor(8,0);
+            }else{
+                lcd.setCursor(7,0);
+            }
+
+          	lcd.print("RPM");
         }
         
         /* Comando de velocidade - para esse comando, é feito a identificacao do comando "VEL" atraves dos 3 primeiros elementos da variavel 'codigo'
@@ -302,49 +315,59 @@ long fun_deco() {
                     
                     /* Verifica se o numero esta dentro do limite de 000 a 100 e retorna o seu valor inteiro */
                     if (vel.toInt() >= 0 && vel.toInt() <= 100) {
-                        
+                        lcd.clear();
                         lcd.print("OK VEL ");
-                        lcd.setCursor(7,1);
+                        lcd.setCursor(7,0);
                         lcd.print(vel);
-                        lcd.setCursor(12,1);
+                        lcd.setCursor(11,0);
                         lcd.print("%");
                         
                         return vel.toInt();
                     }
                     /* Caso contrario, envia a mensagem de parametro incorreto */
                     else {
-                        
-                        lcd.print("ERRO: PARAMETRO INCORRETO");
+                        lcd.clear();
+                        lcd.print("ERRO: PARAMETRO ");
+                        lcd.setCursor(0,1);
+                  	    lcd.print("INCORRETO");
                     }
                 }
                 /* Caso contrario, envia a mensagem de parametro incorreto*/
                 else {
-                    
-                    lcd.print("ERRO: PARAMETRO INCORRETO");
+                    lcd.clear();
+                    lcd.print("ERRO: PARAMETRO ");
+                  	lcd.setCursor(0,1);
+                  	lcd.print("INCORRETO");
                 }
             }
             /* Caso o tamanho do comando enviado não corresponda ao tamanho desejado, é enviado a mensagem de parametro incorreto */
             else if (codigo.length() < 3 && codigo.length() > 0) {
-                
-                lcd.print("ERRO: PARAMETRO INCORRETO");
+                lcd.clear();
+                lcd.print("ERRO: PARAMETRO ");
+                lcd.setCursor(0,1);
+                lcd.print("INCORRETO");
             }
             /* Caso o tamanho do numeros for 0, isto é, não foi dgitado nenhum numero, é enviado uma mensagem de parâmetro ausente*/
             else {
-                
-                lcd.print("ERRO: PARAMETRO AUSENTE");
+                lcd.clear();
+                lcd.print("ERRO: PARAMETRO");
+                lcd.setCursor(0,1);
+          	    lcd.print("AUSENTE");
             }
         }
 
         /* Caso a mensagem enviada ao monitor serial não corresponda com nenhum dos casos anteriores ou que a mensagem extrapolou o tamanho 
            definido (tamanho maximo do buffer é de 8 - contando com o *) é enviado a mensagem de erro de comando inexistente */ 
         else {
-            
-            lcd.print("ERRO: COMANDO INEXISTENTE")
+            lcd.clear();
+            lcd.print("ERRO: COMANDO IN");
+          	lcd.setCursor(0,2);
+          	lcd.print("EXISTENTE");
         }
     } 
 
-    motor(movimento, vel); // Chama a funcao que controla o sentido e a valocidade do motor
-    
+    motor(movimento, vel.toInt()); // Chama a funcao que controla o sentido e a valocidade do motor
+
 }
 
 // Temporizador de 4 ms
