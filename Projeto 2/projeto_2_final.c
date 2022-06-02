@@ -242,9 +242,9 @@ long fun_deco() {
                     if (vel.toInt() >= 0 && vel.toInt() <= 100) {
                         
                         lcd.print("OK VEL ");
-                        lcd.setCursor(7,1);
+                        lcd.setCursor(7,0);
                         lcd.print(vel);
-                        lcd.setCursor(12,1);
+                        lcd.setCursor(11,0);
                         lcd.print("%");
                         
                         //return vel.toInt();
@@ -254,24 +254,32 @@ long fun_deco() {
                     /* Caso contrario, envia a mensagem de parametro incorreto */
                     else {
                         
-                        lcd.print("ERRO: PARAMETRO INCORRETO");
+                        lcd.print("ERRO: PARAMETRO");
+                        lcd.setCursor(0, 1);
+                        lcd.print("INCORRETO");
                     }
                 }
                 /* Caso contrario, envia a mensagem de parametro incorreto*/
                 else {
                     
-                    lcd.print("ERRO: PARAMETRO INCORRETO");
+                    lcd.print("ERRO: PARAMETRO");
+                    lcd.setCursor(0, 1);
+                    lcd.print("INCORRETO");
                 }
             }
             /* Caso o tamanho do comando enviado não corresponda ao tamanho desejado, é enviado a mensagem de parametro incorreto */
             else if (codigo.length() < 3 && codigo.length() > 0) {
                 
-                lcd.print("ERRO: PARAMETRO INCORRETO");
+                lcd.print("ERRO: PARAMETRO");
+                lcd.setCursor(0, 1);
+                lcd.print("INCORRETO");
             }
             /* Caso o tamanho do numeros for 0, isto é, não foi dgitado nenhum numero, é enviado uma mensagem de parâmetro ausente*/
             else {
                 
-                lcd.print("ERRO: PARAMETRO AUSENTE");
+                lcd.print("ERRO: PARAMETRO");
+                lcd.setCursor(0, 1);
+                lcd.print("AUSENTE");
             }
         }
 
@@ -279,7 +287,9 @@ long fun_deco() {
            definido (tamanho maximo do buffer é de 8 - contando com o *) é enviado a mensagem de erro de comando inexistente */ 
         else {
             
-            lcd.print("ERRO: COMANDO INEXISTENTE");
+            lcd.print("ERRO: PARAMETRO");
+            lcd.setCursor(0, 1);
+            lcd.print("INEXISTENTE");
         }
     
     // Verifico situação de troca de sentido
@@ -456,6 +466,7 @@ ISR(TIMER0_COMPA_vect){
 
     cont++;
 
+    // 
     if(!(cont%25)) pode_entrar = 1;
 
     // Indico que passou o tempo do temporizador e que podemos enviar um novo dado via I2C e trocar o display
