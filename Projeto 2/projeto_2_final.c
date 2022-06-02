@@ -5,13 +5,15 @@
 
 // Módulos:
 /*
-    * Visor -> Tem a função, é só passar os algarismos para ela representar (OK Funcionando)
+
+    * Visor -> Tem a função, é só passar os algarismos para ela representar. Ta piscando de forma arbitrária -> Mudar forma do uso dos resistores
     * Motor -> Tem a função. Lembrando que ela deve ser chamada pela função de recebimento/decodificação do comando (OK Funcionando)
     * Encoder -> Tem a função, que estima a frequência e separa os algarismos (OK Funcionando)
     * Receptor -> Tem a função, que obtêm os caracteres de entrada e entrega para o decodificador (OK Funcionando)
     * Decodificador -> Tem a função, que faz o tratamento correto dos caracteres obtidos (OK funcionando)
     * LCD -> Tem os comandos dentro do decodificador, mas não sei se está correto a forma de printar e ele não limpa o LCD quando troca de 
     comdando, mas quando usamos a função clear() temos que o LCD apresenta um comportamento estranho.
+
 */
 
 // Usamos Timer 0 -> 4 ms
@@ -87,10 +89,6 @@ bool troca_sent = 0;    // Flag para sinalizar troca de sentido
 // ---------------------------------------------------------
 
 bool pode_entrar = 0;
-bool retorno = 0;
-
-char lcd_status;
-
 
 void setup(){
 
@@ -109,7 +107,7 @@ void setup(){
     conf_PWM();
 
     pinMode(A0, INPUT); // Pino A0 como entrada -> Encoder
-    pinMode(13,OUTPUT);
+    
     Serial.begin(9600); // Serial para Debug
     
     Wire.begin();       // Inicio o Wire
@@ -123,13 +121,9 @@ void setup(){
 
 
 void loop(){
-    fun_receber();
+
     // Obter valores inseridos na Serial e decodificá-los
     fun_deco();
-
-    if (pode_entrar) {
-        lcd_print(lcd_status);
-    }
 
     // Obtenção da frequência
     frequencia();
@@ -179,11 +173,14 @@ bool fun_receber(){
 
 // Função que decodifica a mensagem que foi enviada ao monitor, e para o caso de setar a velocidade, retorna o valor da velocidade
 long fun_deco() {
-
     
-    // Verifica se a variavel de sinalizacao de mensagem foi setada
-    if(fun_receber()) {
 
+
+    // Verifica se a variavel de sinalizacao de mensagem foi setada
+    if(fun_receber() && pode_entrar) {
+        
+        lcd.clear();
+        lcd.setCursor(0,0); // Cursor na coluna 0 e linha 0
         String codigo = ""; 
 
         // Armazena os elementos do buffer dentro da variavel do tipo String para manipulacoes futuras
@@ -195,19 +192,35 @@ long fun_deco() {
         // Verifica qual comando foi escrito no monitor serial, para enviar a UART sua respectiva mensagem (de erro ou nao)
         if (codigo.equalsIgnoreCase("VENT")) {
             movimento = 'h';
-            lcd_status = 1;
             
+            lcd.print("OK VENT"); 
         }
         else if (codigo.equalsIgnoreCase("EXAUST")) {
             movimento = 'a';
-            lcd_status = 2;
+            
+            lcd.print("OK EXAUST"); 
         }
         else if (codigo.equalsIgnoreCase("PARA")) {
             movimento = 'p';
-            lcd_status = 3;
+            
+            lcd.print("OK PARA"); 
         }
         else if (codigo.equalsIgnoreCase("RETVEL")) {
-            lcd_status = 4;
+            
+            lcd.print("VEL: ");
+            lcd.setCursor(5,0);
+            lcd.print(rpm);    // coloca o valor da velocidade no instante
+            if(rpm >= 1000) {
+                lcd.setCursor(10,0);
+            }else if(rpm >= 100){
+                lcd.setCursor(9,0);
+            }else if(rpm >= 10){
+                lcd.setCursor(8,0);
+            }else{
+                lcd.setCursor(7,0);
+            }
+
+            lcd.print("RPM");
         }
         
         /* Comando de velocidade - para esse comando, é feito a identificacao do comando "VEL" atraves dos 3 primeiros elementos da variavel 'codigo'
@@ -228,7 +241,11 @@ long fun_deco() {
                     /* Verifica se o numero esta dentro do limite de 000 a 100 e retorna o seu valor inteiro */
                     if (vel.toInt() >= 0 && vel.toInt() <= 100) {
                         
-                        lcd_status = 5;
+                        lcd.print("OK VEL ");
+                        lcd.setCursor(7,1);
+                        lcd.print(vel);
+                        lcd.setCursor(12,1);
+                        lcd.print("%");
                         
                         //return vel.toInt();
                         vel_atual = (int) vel.toInt();
@@ -237,24 +254,24 @@ long fun_deco() {
                     /* Caso contrario, envia a mensagem de parametro incorreto */
                     else {
                         
-                        lcd_status = 6;
+                        lcd.print("ERRO: PARAMETRO INCORRETO");
                     }
                 }
                 /* Caso contrario, envia a mensagem de parametro incorreto*/
                 else {
                     
-                    lcd_status = 6;
+                    lcd.print("ERRO: PARAMETRO INCORRETO");
                 }
             }
             /* Caso o tamanho do comando enviado não corresponda ao tamanho desejado, é enviado a mensagem de parametro incorreto */
             else if (codigo.length() < 3 && codigo.length() > 0) {
                 
-                lcd_status = 6;
+                lcd.print("ERRO: PARAMETRO INCORRETO");
             }
             /* Caso o tamanho do numeros for 0, isto é, não foi dgitado nenhum numero, é enviado uma mensagem de parâmetro ausente*/
             else {
                 
-                lcd_status = 7;
+                lcd.print("ERRO: PARAMETRO AUSENTE");
             }
         }
 
@@ -262,7 +279,7 @@ long fun_deco() {
            definido (tamanho maximo do buffer é de 8 - contando com o *) é enviado a mensagem de erro de comando inexistente */ 
         else {
             
-            lcd_status = 8;
+            lcd.print("ERRO: COMANDO INEXISTENTE");
         }
     
     // Verifico situação de troca de sentido
@@ -276,87 +293,11 @@ long fun_deco() {
             motor(movimento, vel_atual);
         }
 
-        pode_entrar = 1;
+        pode_entrar = 0;
+    
     }
-    
 
     
-}
-
-
-void lcd_print(char p) {
-    
-    lcd.clear();
-    lcd.setCursor(0,0); // Cursor na coluna 0 e linha 0
-
-    switch(p){
-
-        case 1:
-            lcd.clear();
-            lcd.print("OK VENT"); 
-            break;
-
-        case 2:
-            lcd.clear();
-            lcd.print("OK EXAUST"); 
-            break;
-
-        case 3:
-            lcd.clear();
-            lcd.print("OK PARA");
-            break;
-
-        case 4:
-            lcd.clear();
-            lcd.print("VEL: ");
-            lcd.setCursor(5,0);
-            lcd.print(rpm);    // coloca o valor da velocidade no instante
-            if(rpm >= 1000) {
-                lcd.setCursor(10,0);
-            }else if(rpm >= 100){
-                lcd.setCursor(9,0);
-            }else if(rpm >= 10){
-                lcd.setCursor(8,0);
-            }else{
-                lcd.setCursor(7,0);
-            }
-
-            lcd.print("RPM");
-            break;
-
-        case 5:
-            lcd.clear();
-            lcd.print("OK VEL ");
-            lcd.setCursor(7,0);
-            lcd.print(vel);
-            lcd.setCursor(11,0);
-            lcd.print("%");
-            break;
-
-        case 6: 
-            lcd.clear();
-            lcd.print("ERRO: PARAMETRO ");
-            lcd.setCursor(0,1);
-            lcd.print("INCORRETO");
-            break;
-
-        case 7:
-            lcd.clear();
-            lcd.print("ERRO: PARAMETRO");
-            lcd.setCursor(0,1);
-            lcd.print("AUSENTE");
-            break;
-
-        case 8:
-            lcd.clear();
-            lcd.print("ERRO: COMANDO ");
-            lcd.setCursor(0,2);
-            lcd.print("INEXISTENTE");
-            break;
-
-    }
-    pode_entrar = 0;
-
 }
 
 // Função para inserir tipo de movimento e tensão média (PWM)
@@ -429,13 +370,13 @@ void visor(int x, int y, int w, int z ){
     if(contDisplay > 3) contDisplay = 0;
 
     // Verifico se o motor já parou caso fizermos uma troca de movimento
-      if(troca_sent && rpm == 0){
-          troca_sent = 0;   // reseto para identificar que a troca de movimento já ocorreu
-          motor(movimento, vel_atual);  // Aplico movimento desejado
-      }
+    if(troca_sent && rpm == 0){
+        troca_sent = 0;   // reseto para identificar que a troca de movimento já ocorreu
+        motor(movimento, vel_atual);  // Aplico movimento desejado
+    }
 
 }
- 
+
 // Função para cálculo da frequência e separação dos algarismos
 void frequencia(void) {
 
@@ -452,13 +393,11 @@ void frequencia(void) {
       // Reseto variáveis de contagem
       n = 0;
       cont = 0;
-
-    
       
       // Armazeno os algarismos da medida de frequência
-      m =  rpm * 0.001;
-      c = (rpm - 1000*m) * 0.01;
-      d = (rpm - 1000*m - 100*c) * 0.1;
+      m =  rpm / 1000;
+      c = (rpm - 1000*m) / 100;
+      d = (rpm - 1000*m - 100*c) / 10;
       u = (rpm - 1000*m - 100*c - 10*d);
 
     }
@@ -516,7 +455,9 @@ void conf_PWM(){
 ISR(TIMER0_COMPA_vect){
 
     cont++;
-    
+
+    if(!(cont%25)) pode_entrar = 1;
+
     // Indico que passou o tempo do temporizador e que podemos enviar um novo dado via I2C e trocar o display
     troca = 1;
 
