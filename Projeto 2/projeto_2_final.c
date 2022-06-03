@@ -88,6 +88,7 @@ char movimento_ant = 'p';   // Variável para movimentos anterior
 bool troca_sent = 0;    // Flag para sinalizar troca de sentido
 // ---------------------------------------------------------
 
+// Variável que irá bloquear o LCD de ficar frequentemente atualizando-se 
 bool pode_entrar = 0;
 
 void setup(){
@@ -115,6 +116,8 @@ void setup(){
     /* Definicao do numero de linhas e colunas do LCD */
     lcd.begin(16,2);
     //Inicio o LCD com ele apagado
+    // Obter valores inseridos na Serial e decodificá-los (caso haja algo na serial, já faz a leitura)
+    fun_deco();
     lcd.clear();
     
 }
@@ -176,7 +179,7 @@ long fun_deco() {
     
 
 
-    // Verifica se a variavel de sinalizacao de mensagem foi setada
+    // Verifica se a variavel de sinalizacao de mensagem foi setada e se passou um tempo suficiente para ele se atualizar
     if(fun_receber() && pode_entrar) {
         
         lcd.clear();
@@ -190,22 +193,22 @@ long fun_deco() {
 
 
         // Verifica qual comando foi escrito no monitor serial, para enviar a UART sua respectiva mensagem (de erro ou nao)
-        if (codigo.equalsIgnoreCase("VENT")) {
+        if (codigo.equals("VENT")) {
             movimento = 'h';
             
             lcd.print("OK VENT"); 
         }
-        else if (codigo.equalsIgnoreCase("EXAUST")) {
+        else if (codigo.equals("EXAUST")) {
             movimento = 'a';
             
             lcd.print("OK EXAUST"); 
         }
-        else if (codigo.equalsIgnoreCase("PARA")) {
+        else if (codigo.equals("PARA")) {
             movimento = 'p';
             
             lcd.print("OK PARA"); 
         }
-        else if (codigo.equalsIgnoreCase("RETVEL")) {
+        else if (codigo.equals("RETVEL")) {
             
             lcd.print("VEL: ");
             lcd.setCursor(5,0);
@@ -225,7 +228,7 @@ long fun_deco() {
         
         /* Comando de velocidade - para esse comando, é feito a identificacao do comando "VEL" atraves dos 3 primeiros elementos da variavel 'codigo'
            e, após isso, é verificado se a o numero que seta a velocidade do motor esta no formato xxx (xxx entre 000 e 100) */
-        else if (codigo.substring(0, 3).equalsIgnoreCase("VEL")) {
+        else if (codigo.substring(0, 4).equals("VEL ")) {
 
             codigo.remove(0,4); // Remove os 4 primeiros elementos do comando ('VEL '), para que seja trabalhado somente com os numeros
       
@@ -244,7 +247,7 @@ long fun_deco() {
                         lcd.print("OK VEL ");
                         lcd.setCursor(7,0);
                         lcd.print(vel);
-                        lcd.setCursor(11,0);
+                        lcd.setCursor(10,0);
                         lcd.print("%");
                         
                         //return vel.toInt();
@@ -303,6 +306,7 @@ long fun_deco() {
             motor(movimento, vel_atual);
         }
 
+        // Sinalizo que o último comando enviado já foi executado e está aguardando o próximo
         pode_entrar = 0;
     
     }
@@ -466,8 +470,8 @@ ISR(TIMER0_COMPA_vect){
 
     cont++;
 
-    // 
-    if(!(cont%25)) pode_entrar = 1;
+    // Depois de 220 ms permitimos que tenha mudança no LCD
+    if(!(cont%55)) pode_entrar = 1;
 
     // Indico que passou o tempo do temporizador e que podemos enviar um novo dado via I2C e trocar o display
     troca = 1;
