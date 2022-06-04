@@ -2,22 +2,7 @@
 // Gustavo Freitas Alves          236249
 // Jitesh Ashok Manilal Vassaram  175867
 
-
-// Módulos:
-/*
-
-    * Visor -> Tem a função, é só passar os algarismos para ela representar. Ta piscando de forma arbitrária -> Mudar forma do uso dos resistores
-    * Motor -> Tem a função. Lembrando que ela deve ser chamada pela função de recebimento/decodificação do comando (OK Funcionando)
-    * Encoder -> Tem a função, que estima a frequência e separa os algarismos (OK Funcionando)
-    * Receptor -> Tem a função, que obtêm os caracteres de entrada e entrega para o decodificador (OK Funcionando)
-    * Decodificador -> Tem a função, que faz o tratamento correto dos caracteres obtidos (OK funcionando)
-    * LCD -> Tem os comandos dentro do decodificador, mas não sei se está correto a forma de printar e ele não limpa o LCD quando troca de 
-    comdando, mas quando usamos a função clear() temos que o LCD apresenta um comportamento estranho.
-
-*/
-
 // Usamos Timer 0 -> 4 ms
-
 
 
 // Bibliotecas 
