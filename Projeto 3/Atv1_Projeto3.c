@@ -1,54 +1,72 @@
-// Atividade Parcial 1 - Recepção e decodificação de comandos
-// Gustavo Freitas Alves & Jitesh Ashok Manilal Vassaram
-
-
-// -------------------------------------------------------------------------------
-
 #include <Wire.h>
 
-//byte dado = 0;
-//unsigned char registrador_de_endereco = 0;
-//unsigned char memoria[256];
-unsigned char palavra;
+#define ADD 0x50    // 0101 0000
 
-void setup()
-{
-    Wire.begin(0x50);         
-    Wire.onReceive(escrever);
-    Wire.onRequest(ler);
-    Serial.begin(9600);
-}
+byte vetor[2];
+byte t = 0x00;
+char num = 33;
 
-void loop()
-{
+void setup() {
+
+  Serial.begin(9600);
+
+  Wire.begin();
+
+  pinMode(13, OUTPUT);
+  digitalWrite(13, 0);
+
+  delay(1000);
   
-   _delay_ms(1);
-
-   escrever(0, 76);
-   _delay_ms(500);
-   ler(0);
-   Serial.println(palavra);
+  //Write(0x05, 64);
+  //Read(0x05);
 
 }
 
 
-
-void escrever(unsigned int add, unsigned char dado) {
-
-    Wire.beginTransmission(0x50);
-    Wire.write(add);
-    Wire.write(dado);
-    Wire.endTransmission();
+void loop() {
+	//_delay_ms(1);
+  
+  
+  if(t<0xFF) {
+    Write(t, num);
+  	Read(t);
+    num++;
+    t++;
+  }
+  
+  /*Write(0x05, 65);
+  Write(0x06, 66);
+  _delay_ms(1000);
+  Read(0x05);
+  Read(0x06);
+  */
+  _delay_ms(1000);
 }
 
-unsigned char ler(unsigned int add) {
+void Write(byte Add, byte Data){
+  vetor[0] = Add;
+  vetor[1] = Data;
+  Serial.println("Entrou aqui Write!");
+  Wire.beginTransmission(ADD);
+  Wire.write(vetor,2);
+  //Wire.write(Data);
+  Wire.endTransmission();
 
-    while (Wire.available())
-    {
-        Wire.beginTransmission(0x50);
-        Wire.write(add);
-        palavra = Wire.read();
-        Wire.endTransmission();
-    }
-    return palavra
+  _delay_ms(600); // tempo de espera para escrita + 100ms
+  
+}
+
+void Read(byte Add){
+  Serial.println("Entrou aqui Read!");
+  char DATA;
+
+  Wire.beginTransmission(ADD);
+  Wire.write(Add);
+  Wire.endTransmission();
+  Wire.requestFrom(ADD, 1);
+  delay(1);
+  if(Wire.available()){
+    DATA = Wire.read(); 
+    Serial.println(DATA);
+  }
 }
