@@ -24,6 +24,7 @@ void setup() {
 
   // GPIO para Write Protect
   pinMode(WP, OUTPUT);
+  // Deixo em nível baixo para operar de forma normal na escrita/leitura
   digitalWrite(WP, 0);
 
   delay(1000);
