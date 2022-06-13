@@ -1,41 +1,73 @@
-// C++ code
-//
+// Atividade Parcial 1 - Leitura e escrita na memória EEPROM 24C16
+// Gustavo Freitas Alves          236249
+// Jitesh Ashok Manilal Vassaram  175867
 
 #include <Wire.h>
 
-byte dado = 0;
+#define ADD 0x50    // 0101 0000
+#define WP 13       // Write Protect
 
-void setup()
-{
-  Wire.begin();
+// Vetor para endereço + dado
+byte vetor[2];
+
+// Endereço
+byte t = 0x00;
+
+// Dado
+char num = 33;
+
+void setup() {
+
   Serial.begin(9600);
+
+  Wire.begin();
+
+  // GPIO para Write Protect
+  pinMode(WP, OUTPUT);
+  digitalWrite(WP, 0);
+
+  delay(1000);
+
 }
 
-void loop()
-{
-  
-  // Escrever 32 na posição 0b10100000 --> endereço + escrita
-  // 0b0010 0000 --> dado
-  
-  
-  Wire.beginTransmission(0x50);
-  Wire.write(0x01);
-  Wire.write(76);
-  Wire.endTransmission();
-  
-  _delay_ms(10);
 
-  // Ler --> 0b10100001 --> endereço + leitura
+void loop() {
   
-  Wire.beginTransmission(0x50);
-  Wire.write(0x01);
-  Wire.endTransmission();
-  Wire.beginTransmission(0xA1);
-  dado = Wire.read();
-  Wire.endTransmission();
+  // Escrita incrementada para teste
+  if(t<0xFF) {
+    Write(t, num);
+  	Read(t);
+    num++;
+    t++;
+  }
   
-  Serial.println(dado);
-  
-  _delay_ms(500);
+  _delay_ms(1000);
+}
 
+// Função de escrita
+void Write(byte Add, byte Data){
+  vetor[0] = Add;   // Byte de endereço
+  vetor[1] = Data;  // Byte de dado
+  Wire.beginTransmission(ADD);
+  Wire.write(vetor,2);
+  Wire.endTransmission();
+
+  _delay_ms(600); // tempo de espera para escrita + 100ms
+  
+}
+
+// Função de leitura
+void Read(byte Add){
+
+  char DATA;
+
+  Wire.beginTransmission(ADD);
+  Wire.write(Add);
+  Wire.endTransmission();
+  Wire.requestFrom(ADD, 1);
+  _delay_ms(1);
+  if(Wire.available()){
+    DATA = Wire.read(); 
+    Serial.println(DATA);
+  }
 }
