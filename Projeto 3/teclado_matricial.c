@@ -12,31 +12,28 @@
 #define C2 4
 #define C3 3
 
-/*
-
-    Debounce de 50 ms
-    Mudança de linha a cada 200 ms
-    Varredura nas colunas
-
-*/
 
 // Variável para contagem de tempo
 byte cont = 0;
 
 // Status para definir qual linha estará acionada
-byte status_l = 0;
+unsigned int status_l = 0;  
 
 // Status para definir qual coluna foi acionada
-byte status_c = 0; // 0 indica que não foi acionada nenhuma coluna
+unsigned int status_c = 0; // 0 indica que não foi acionada nenhuma coluna
 
-// Detectou o acionadmento de algum botão
-bool detect = 0;
+// Variável para habilitar a checagem dos botões
+bool deb = 0;
 
-// Status da coluna para confirmar depois do debounce
-byte status_c_deb = 0;
+// Contador para os botões (usados para o debounce)
+byte cont_c1 = 0;
+byte cont_c2 = 0;
+byte cont_c3 = 0;
 
-// Contador de tempo para debounce
-byte cont_deb = 0;
+// Variáveis para armazenamento do estado atual das colunas
+bool d_C1 = 0;
+bool d_C2 = 0;
+bool d_C3 = 0;
 
 
 void setup(){
@@ -49,11 +46,20 @@ void setup(){
   pinMode(L3, OUTPUT);
   pinMode(L4, OUTPUT);
 
+  // Deixo as linhas desativadas na inicialização
+  digitalWrite(L1, 0);
+  digitalWrite(L2, 0);
+  digitalWrite(L3, 0);
+  digitalWrite(L4, 0);
+
+  // Colunas serão habilitadas como entradas 
   pinMode(C1, INPUT);
   pinMode(C2, INPUT);
   pinMode(C3, INPUT);
 
+  // Com isso, teremos a estratégia de ficar alternando entre as linhas e varrer as colunas verificando qual botão foi pressionado.
 
+  // Configuração do temporizador de 4 ms
   configuracao_Timer0();
 
 }
@@ -64,11 +70,11 @@ void loop(){
 
 }
 
+// Função para o teclado matricial
 void teclado(){
 
-    if(!detect){
-        // Definir a linha acionada a cada 200 ms
-        switch (status_l){
+    // Alternância entre a linha acionada ocorre a cada 160 ms
+    switch (status_l){
 
         case 0:
             digitalWrite(L1, 1);
@@ -87,61 +93,58 @@ void teclado(){
             digitalWrite(L3, 0);
             break;
 
-        }
+    }
+
+    // Armazenamento do estado atual de cada coluna da respectiva linha
+    d_C1 = digitalRead(C1);
+    d_C2 = digitalRead(C2);
+    d_C3 = digitalRead(C3);
     
-        // Leitura das colunas
-        bool d_C1 = digitalRead(C1);
-        bool d_C2 = digitalRead(C2);
-        bool d_C3 = digitalRead(C3);
+    // A cada 4 ms checo se alguma coluna foi acionada
+    if(deb){
 
+        deb = 0;
+        
 
+        // Faço contagem de vezes que tal coluna esteve em estado alto para usar como estratégica para o debounce
         if(d_C1){
-            status_c = 1;
-            detect = 1;
+            cont_c1++;
         }else if(d_C2){
-            status_c = 2; 
-            detect = 1;
+            cont_c2++;
         }else if(d_C3){
+            cont_c3++;
+        }
+
+        // Após um tempo maior que 48 ms confirmo se alguma das colunas foi acionada
+        if(cont_c1 > 12){
+            status_c = 1;
+            cont_c1 = 0;
+            print();
+        }else if(cont_c2 > 12){
+            status_c = 2;
+            cont_c2 = 0;
+            print();
+        }else if(cont_c3 > 12){
             status_c = 3;
-            detect = 1;
+            cont_c3 = 0;
+            print();
         }else{
             status_c = 0;
         }
 
-    }else{
-        // depois de 20 ms checo novamente se o botão ainda está pressionado
-        if(cont_deb > 12){
-
-            // Leitura das colunas
-            bool d_C1 = digitalRead(C1);
-            bool d_C2 = digitalRead(C2);
-            bool d_C3 = digitalRead(C3);
-
-            if(d_C1){
-                status_c_deb = 1;
-            }else if(d_C2){
-                status_c_deb = 2; 
-            }else if(d_C3){
-                status_c_deb = 3;
-            }else{
-                status_c_deb = 0;
-            }
-
-            if(status_c == status_c_deb){
-                Serial.print("Linha: ");
-                Serial.println(status_l);
-                Serial.print("Coluna: ");
-                Serial.println(status_c);
-            }
-
-            cont_deb = 0;
-            detect = 0;
-
-        }
     }
     
-  
-  
+
+}
+
+// Função de print rápido para teste
+void print(){
+
+    Serial.print("L: ");
+    Serial.println(status_l);
+    Serial.print("C: ");
+    Serial.println(status_c);
+
 }
 
 // Temporizador de 4 ms
@@ -176,15 +179,17 @@ void configuracao_Timer0(){
 // Rotina de servico de interrupcao do temporizador de 4 ms
 ISR(TIMER0_COMPA_vect){
 
+    // Contador para as linhas
     cont++;
 
-    if(cont >= 50){
+    // Após 160 ms muda a linha e reseta
+    if(cont >= 40){
         status_l++;
         if(status_l > 3) status_l = 0;
         cont = 0;
     }
 
-    if(detect){
-        cont_deb++;
-    }
+    // Habilita checagem da coluna
+    deb = 1;
+
 }
