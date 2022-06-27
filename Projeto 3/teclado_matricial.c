@@ -41,8 +41,10 @@ char ult_char = NULL;
 // Armazerna o caracter do respectivo botão pressionado
 char Car = NULL;
 
+// Contador para tempo em que nenhum botão foi pressionado
 char cont_pres = 0;
 
+// Contador para posicionar os digitos na coluna do LCD
 char pos_lcd = 0;
 
 
@@ -154,7 +156,7 @@ void teclado(){
             cont_c3++;
         }
 
-        // Verifico se alguma das colunas ficou mais de 52 ms pressionada e converto o botão pressionado em seu caracter
+        // Verifico se alguma das colunas ficou mais de 24 ms pressionada e converto o botão pressionado em seu caracter
         // Zero o contador cont_pres, pois verificamos que algum botão foi pressionado
         // Indico qual coluna foi verificada como em alto
         // Zero as contagens de vezes que as colunas foram lidas como alta
