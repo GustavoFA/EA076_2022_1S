@@ -51,6 +51,15 @@ byte vetor[2];
 // Variavel da temperatura
 unsigned int dado;
 
+String codigo = "";
+
+int cod_anterior = 0;
+
+byte LSB;
+byte MSB;
+char LSB_lido;
+char MSB_lido;
+
 void setup(){
 
     cli(); // desabilita as interrupcoes
@@ -100,7 +109,7 @@ long fun_deco() {
         
         lcd.clear();
         lcd.setCursor(0,0); // Cursor na coluna 0 e linha 0
-        String codigo = ""; 
+         
 
         // Armazena os elementos do buffer dentro da variavel do tipo String para manipulacoes futuras
         for(int j=0; j<tam_msg;j++){
@@ -108,37 +117,104 @@ long fun_deco() {
         }
 
 
-        // Verifica qual comando foi escrito no monitor serial, para enviar a UART sua respectiva mensagem (de erro ou nao)
+        // Verifica qual comando foi escrito no teclado, para enviar a UART sua respectiva mensagem (de erro ou nao)
         if (codigo.equals("1")) {
             lcd.print("RESET");
+            lcd.setCursor(0,1);
+            lcd.print("CONFIRMAR?");
+            cod_anterior = 1;
         }
         else if (codigo.equals("2")) {
-            lcd.print("GRAVADOS:");
-            lcd.setCursor(10,0);
-            lcd.print(num);     // Mostra o numero de dados gravados
+            lcd.print("2 - STATUS");
             lcd.setCursor(0,1);
-            lcd.print(1-num);   // Mostra o numero de medicoes que estao disponiveis
+            lcd.print("CONFIRMAR?");
+            cod_anterior = 2;
         }
         else if (codigo.equals("3")) {
-            lcd.print("INICIO DA COLETA");
+            lcd.print("3 - START");
             lcd.setCursor(0,1);
-            lcd.print("PERIODICA");
+            lcd.print("CONFIRMAR?");
+            cod_anterior = 3;
         }
         else if (codigo.equals("4")) {
-            lcd.print("FIM DA COLETA");
+            lcd.print("4 - FIM");
             lcd.setCursor(0,1);
-            lcd.print("PERIODICA");
-            
+            lcd.print("CONFIRMAR?");
+            cod_anterior = 4;
         }
         
         else if (codigo.equals("5")) {
-            lcd.print("NUM. DE MEDIDAS: ");
-
+            lcd.print("5 - TRANSF. DADOS");
+            lcd.setCursor(0,1);
+            lcd.print("CONFIRMAR?");
+            cod_anterior = 5;
         }
+        /*else {
+            lcd.print("BEM VINDO");
+            lcd.setCursor(0,1);
+            lcd.print("DIGITE A FUNCAO:");
+        }*/
+
         // Sinalizo que o último comando enviado já foi executado e está aguardando o próximo
         pode_entrar = 0;
+        confirmacao();
     }
 }
+
+void confirmacao() {
+
+    String temp;
+
+    if (codigo == '#') {
+        switch (cod_anterior)
+        {
+        case 1:
+            /* code */
+            break;
+        case 2:
+            lcd.print("GRAVADOS: ");
+            lcd.setCursor(11,0);
+            lcd.print(/*colocar a variavel de contagem da posicao da memoria*/);
+            lcd.setCursor(0,1);
+            lcd.print("DISPONIVEL: ");
+            lcd.setCursor(13,0);
+            lcd.print(/*colocar 1-(variavel de contagem da posicao da memoria)*/);
+            break;
+        case 3:
+            /* code */
+            temperatura();
+            Write();
+            break;
+        case 4:
+            /* code */
+            break;
+        case 5:
+            lcd.print("TRANSF. DADOS");
+            lcd.setCursor(0,1);
+            lcd.print("QNTDE.: ");
+            // Leitura do teclado aqui
+            LSB = Read(2047);
+            MSB = Read(2046);
+            while (i<N) {
+                endereco = 2*((256*MSB)+LSB);
+                MSB_lido = Read(endereco-1);
+                LSB_lido = Read(endereco);
+                temp = (MSB_lido << 8) + LSB_lido;
+                Serial.println(temp);
+                i++;
+            }
+            Read(/*variavel da quantidade*/);
+            break;
+        }
+    }
+    else if (codigo == '*') {
+        lcd.print("CANCELADO");
+        lcd.setCursor(0,1);
+        lcd.print("DIGITE A FUNCAO:");
+    }
+}
+
+
 
 void temperatura(){
 
@@ -168,7 +244,8 @@ void Read(byte Add){
   //delay(1);
   if(Wire.available()){
     DATA = Wire.read(); 
-    Serial.println(DATA);
+    //Serial.println(DATA);
+    return DATA;
   }
 }
 
