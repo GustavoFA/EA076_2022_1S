@@ -4,17 +4,17 @@
 
 // Link Tinkercad: https://www.tinkercad.com/things/cTmmGuVzZMp-terrific-trug/editel?sharecode=gE3_BYuuf9oVNRcQMq7H1X0me_c7ptIK3DblF9cNT2c
 
-#define L1 9
-#define L2 8
-#define L3 7
-#define L4 6
-#define C1 5
-#define C2 4
-#define C3 3
+#include <LiquidCrystal.h>
 
+#define L1 13
+#define L2 10
+#define L3 2
+#define L4 9
+#define C1 4
+#define C2 3
+#define C3 A5
 
-// Variável para contagem de tempo
-byte cont = 0;
+LiquidCrystal lcd(12, 11, 5, 7, 6, 8); // Definicao dos pinos que serao utilizados para a ligacao do display
 
 // Status para definir qual linha estará acionada
 unsigned int status_l = 0;  
@@ -34,6 +34,16 @@ byte cont_c3 = 0;
 bool d_C1 = 0;
 bool d_C2 = 0;
 bool d_C3 = 0;
+
+// Armazenar ultimo caracter apresentado no LCD
+char ult_char = NULL;
+
+// Armazerna o caracter do respectivo botão pressionado
+char Car = NULL;
+
+char cont_pres = 0;
+
+char pos_lcd = 0;
 
 
 void setup(){
@@ -59,6 +69,11 @@ void setup(){
 
   // Com isso, teremos a estratégia de ficar alternando entre as linhas e varrer as colunas verificando qual botão foi pressionado.
 
+  /* Definicao do numero de linhas e colunas do LCD */
+  
+  lcd.begin(16,2);
+  lcd.clear();  
+
   // Configuração do temporizador de 4 ms
   configuracao_Timer0();
 
@@ -66,14 +81,35 @@ void setup(){
 
 void loop(){
   
+  // Verifico o teclado
   teclado();
+
+  // Caso tenha algum caracter pressionado diferente do ultimo visualizado
+  if(Car != ult_char){
+    // Implementar função do LCD aqui (no lugar do print)
+    if(Car > 0){
+
+        printlcd(Car);
+    }
+    // Salvo o último valor printado
+    ult_char = Car;
+  }
+}
+
+// Função para printar no LCD
+void printlcd(char g){
+
+    lcd.setCursor(pos_lcd,1);
+    lcd.print(g);
+    pos_lcd++;
+    if(pos_lcd > 15) pos_lcd = 0;
 
 }
 
 // Função para o teclado matricial
 void teclado(){
 
-    // Alternância entre a linha acionada ocorre a cada 160 ms
+    // Alternância entre a linha acionada ocorre no tempo do laço 
     switch (status_l){
 
         case 0:
@@ -103,10 +139,13 @@ void teclado(){
     // A cada 4 ms checo se alguma coluna foi acionada
     if(deb){
 
-        deb = 0;
-        
+        // Contador para estado sem botão pressionado 
+        cont_pres++;
 
-        // Faço contagem de vezes que tal coluna esteve em estado alto para usar como estratégica para o debounce
+        // Zero a variável deb para ficar alternando e fazer a condição ser válida apenas a cada 4 ms
+        deb = 0;
+
+        // Faço contagem de vezes que tal coluna esteja em estado alto para usar como estratégica para o debounce
         if(d_C1){
             cont_c1++;
         }else if(d_C2){
@@ -115,37 +154,96 @@ void teclado(){
             cont_c3++;
         }
 
-        // Após um tempo maior que 48 ms confirmo se alguma das colunas foi acionada
-        if(cont_c1 > 12){
-            status_c = 1;
-            cont_c1 = 0;
-            print();
-        }else if(cont_c2 > 12){
-            status_c = 2;
-            cont_c2 = 0;
-            print();
-        }else if(cont_c3 > 12){
-            status_c = 3;
-            cont_c3 = 0;
-            print();
-        }else{
-            status_c = 0;
-        }
+        // Verifico se alguma das colunas ficou mais de 52 ms pressionada e converto o botão pressionado em seu caracter
+        // Zero o contador cont_pres, pois verificamos que algum botão foi pressionado
+        // Indico qual coluna foi verificada como em alto
+        // Zero as contagens de vezes que as colunas foram lidas como alta
+        // Faço a "tradução" da linha e coluna em um caracter
 
+        if(cont_c1 > 6){
+            cont_pres = 0;
+            status_c = 1;
+            cont_c1 = cont_c2 = cont_c3 = 0;
+            tradutor(status_l, status_c);
+        }else if(cont_c2 > 6){
+            cont_pres = 0;
+            status_c = 2;
+            cont_c1 = cont_c2 = cont_c3 = 0;
+            tradutor(status_l, status_c);
+        }else if(cont_c3 > 6){
+            cont_pres = 0;
+            status_c = 3;
+            cont_c1 = cont_c2 = cont_c3 = 0;
+            tradutor(status_l, status_c);
+        }
+        
+        // Esse último estado serve para após um tempo que ficar sem nenhum botão ser pressionado o microcontrolador identificar tal estado
+        // Esse estado serve para solucionar o problema de um botão ficar pressionado e printando no LCD
+        else if(cont_pres > 40){
+            cont_pres = 0;
+            status_c = 0;
+            tradutor(status_l, status_c);
+        }
+        
     }
     
+    // Mudo a posição da linha
+    status_l++;
+    if(status_l > 3) status_l = 0;
 
 }
 
-// Função de print rápido para teste
-void print(){
+// Função para traduzir a leitura do botão para o caracter
+void tradutor(unsigned int lin, unsigned int col){
 
-    Serial.print("L: ");
-    Serial.println(status_l);
-    Serial.print("C: ");
-    Serial.println(status_c);
+    // Faço uma equação para gerar valores decimais unicos para cada digito do teclado
+    unsigned int fator = 10*lin + col;
+
+    switch (fator)
+    {
+    case 1:
+        Car = '1';
+        break;
+    case 2:
+        Car = '2';
+        break;
+    case 3:
+        Car = '3';
+        break;
+    case 11:
+        Car = '4';
+        break;
+    case 12:
+        Car = '5';
+        break;
+    case 13:
+        Car = '6';
+        break;
+    case 21:
+        Car = '7';
+        break;
+    case 22:
+        Car = '8';
+        break;
+    case 23:
+        Car = '9';
+        break;
+    case 31:
+        Car = '*';
+        break;
+    case 32:
+        Car = '0';
+        break;
+    case 33:
+        Car = '#';
+        break;
+    default:
+        Car = NULL;
+        break;
+    }
 
 }
+
 
 // Temporizador de 4 ms
 void configuracao_Timer0(){
@@ -178,16 +276,6 @@ void configuracao_Timer0(){
 
 // Rotina de servico de interrupcao do temporizador de 4 ms
 ISR(TIMER0_COMPA_vect){
-
-    // Contador para as linhas
-    cont++;
-
-    // Após 160 ms muda a linha e reseta
-    if(cont >= 40){
-        status_l++;
-        if(status_l > 3) status_l = 0;
-        cont = 0;
-    }
 
     // Habilita checagem da coluna
     deb = 1;
