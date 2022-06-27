@@ -42,6 +42,8 @@ LiquidCrystal lcd(12, 11, 5, 7, 6, 8); // Definicao dos pinos que serao utilizad
 // Variável que irá bloquear o LCD de ficar frequentemente atualizando-se 
 bool pode_entrar = 0;
 
+bool pode_escrever = 0;
+
 // Vetor utilizado para armazenar na EEPROM 
 byte vetor[2];
 
@@ -82,7 +84,6 @@ void setup(){
 
 void loop(){
 
-    
 
     // Mudança do display e seu valor só ocorrerá a cada interrupção do temporizador, no caso 4 ms, isso está relacionado à variável troca
     if(troca) visor(u, d, c, m);
@@ -95,7 +96,7 @@ long fun_deco() {
 
 
     // Verifica se a variavel de sinalizacao de mensagem foi setada e se passou um tempo suficiente para ele se atualizar
-    if(fun_receber() && pode_entrar) {
+    if(pode_entrar) {
         
         lcd.clear();
         lcd.setCursor(0,0); // Cursor na coluna 0 e linha 0
@@ -132,19 +133,11 @@ long fun_deco() {
         
         else if (codigo.equals("5")) {
             lcd.print("NUM. DE MEDIDAS: ");
-            
-      
-            
+
         }
-
-        
-
         // Sinalizo que o último comando enviado já foi executado e está aguardando o próximo
         pode_entrar = 0;
-    
     }
-
-    
 }
 
 void temperatura(){
@@ -155,27 +148,24 @@ void temperatura(){
 }
 
 void Write(byte Add, byte Data){
-  vetor[0] = Add;
-  vetor[1] = Data;
-  Serial.println("Entrou aqui Write!");
-  Wire.beginTransmission(ADD);
-  Wire.write(vetor,2);
-  //Wire.write(Data);
-  Wire.endTransmission();
+    if (pode_escrever) {
+    vetor[0] = Add;
+    vetor[1] = Data;
+    Wire.beginTransmission(ADD);
+    Wire.write(vetor,2);
+    Wire.endTransmission();
+    }
 
-  _delay_ms(600); // tempo de espera para escrita + 100ms
-  
+    pode_escrever = 0;
 }
 
 void Read(byte Add){
-  Serial.println("Entrou aqui Read!");
   char DATA;
-
   Wire.beginTransmission(ADD);
   Wire.write(Add);
   Wire.endTransmission();
   Wire.requestFrom(ADD, 1);
-  delay(1);
+  //delay(1);
   if(Wire.available()){
     DATA = Wire.read(); 
     Serial.println(DATA);
@@ -256,9 +246,14 @@ void configuracao_Timer0(){
 ISR(TIMER0_COMPA_vect){
 
     cont++;
+    cont_escrita++;
 
     // Depois de 220 ms permitimos que tenha mudança no LCD
     if(!(cont%55)) pode_entrar = 1;
+
+    if(!(cont_escrita%500)) {
+        pode_escrever = 1;
+    }
 
     // Indico que passou o tempo do temporizador e que podemos enviar um novo dado via I2C e trocar o display
     troca = 1;
