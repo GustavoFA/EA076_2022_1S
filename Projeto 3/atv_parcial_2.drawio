@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2022-06-27T20:16:11.637Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36" etag="JUif7mLj7iqQ82Bt3Dd8" version="19.0.0" type="github">
+<mxfile host="app.diagrams.net" modified="2022-06-27T20:19:01.774Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36" etag="2JOzpWtqhb7GOZKC9AWB" version="19.0.0" type="github">
   <diagram id="kFVZqkAS3tkFsLg5WEib" name="Page-1">
-    <mxGraphModel dx="1335" dy="742" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="789" dy="438" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -66,7 +66,7 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="YByWM-4DBFUtPwOcdzVA-11" value="Verifico se passou mais de 40 vezes que algum botão não foi pressionado" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="YByWM-4DBFUtPwOcdzVA-11" value="Verifico se passou mais de 40 vezes que nenhum botão foi pressionado" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="410" y="800" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="YByWM-4DBFUtPwOcdzVA-21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="YByWM-4DBFUtPwOcdzVA-14" target="YByWM-4DBFUtPwOcdzVA-4">
