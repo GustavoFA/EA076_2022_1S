@@ -8,6 +8,13 @@
 // Bibliotecas 
 #include <Wire.h>
 #include <LiquidCrystal.h>
+#define L1 13
+#define L2 10
+#define L3 2
+#define L4 9
+#define C1 4
+#define C2 3
+#define C3 A5
 
 #define ADD 0x50    // 0101 0000 - ENDERECO DO 24c16
 
@@ -60,6 +67,40 @@ byte MSB;
 char LSB_lido;
 char MSB_lido;
 
+// --------------------
+// Teclado Matricial
+
+// Status para definir qual linha estará acionada
+unsigned int status_l = 0;  
+
+// Status para definir qual coluna foi acionada
+unsigned int status_c = 0; // 0 indica que não foi acionada nenhuma coluna
+
+// Variável para habilitar a checagem dos botões
+bool deb = 0;
+
+// Contador para os botões (usados para o debounce)
+byte cont_c1 = 0;
+byte cont_c2 = 0;
+byte cont_c3 = 0;
+
+// Variáveis para armazenamento do estado atual das colunas
+bool d_C1 = 0;
+bool d_C2 = 0;
+bool d_C3 = 0;
+
+// Armazenar ultimo caracter apresentado no LCD
+char ult_char = NULL;
+
+// Armazerna o caracter do respectivo botão pressionado
+char Car = NULL;
+
+char cont_pres = 0;
+
+char pos_lcd = 0;
+
+// ---------------------------
+
 void setup(){
 
     cli(); // desabilita as interrupcoes
@@ -81,6 +122,27 @@ void setup(){
     
     Wire.begin();       // Inicio o Wire
 
+    // Configuracao do teclado matricial
+    // Linhas serão acionadas e colunas serão lidas
+    pinMode(L1, OUTPUT);
+    pinMode(L2, OUTPUT);
+    pinMode(L3, OUTPUT);
+    pinMode(L4, OUTPUT);
+
+    // Deixo as linhas desativadas na inicialização
+    digitalWrite(L1, 0);
+    digitalWrite(L2, 0);
+    digitalWrite(L3, 0);
+    digitalWrite(L4, 0);
+
+    // Colunas serão habilitadas como entradas 
+    pinMode(C1, INPUT);
+    pinMode(C2, INPUT);
+    pinMode(C3, INPUT);
+
+    // Com isso, teremos a estratégia de ficar alternando entre as linhas e varrer as colunas verificando qual botão foi pressionado.
+
+
     /* Definicao do numero de linhas e colunas do LCD */
     lcd.begin(16,2);
     //Inicio o LCD com ele apagado
@@ -93,9 +155,23 @@ void setup(){
 
 void loop(){
 
+    // Verifico o teclado
+    teclado();
+
+    // Caso tenha algum caracter pressionado diferente do ultimo visualizado
+    if(Car != ult_char){
+    // Implementar função do LCD aqui (no lugar do print)
+        if(Car > 0){
+
+            printlcd(Car);
+        }
+        
+        // Salvo o último valor printado
+        ult_char = Car;
+    }
 
     // Mudança do display e seu valor só ocorrerá a cada interrupção do temporizador, no caso 4 ms, isso está relacionado à variável troca
-    if(troca) visor(u, d, c, m);
+    //if(troca) visor(u, d, c, m);
 
 }
 
@@ -109,41 +185,35 @@ long fun_deco() {
         
         lcd.clear();
         lcd.setCursor(0,0); // Cursor na coluna 0 e linha 0
-         
-
-        // Armazena os elementos do buffer dentro da variavel do tipo String para manipulacoes futuras
-        for(int j=0; j<tam_msg;j++){
-          codigo.concat(mensagem[j]);
-        }
 
 
         // Verifica qual comando foi escrito no teclado, para enviar a UART sua respectiva mensagem (de erro ou nao)
-        if (codigo.equals("1")) {
+        if (Car == "1")) {
             lcd.print("RESET");
             lcd.setCursor(0,1);
             lcd.print("CONFIRMAR?");
             cod_anterior = 1;
         }
-        else if (codigo.equals("2")) {
+        else if (Car == "2") {
             lcd.print("2 - STATUS");
             lcd.setCursor(0,1);
             lcd.print("CONFIRMAR?");
             cod_anterior = 2;
         }
-        else if (codigo.equals("3")) {
+        else if (Car == "3") {
             lcd.print("3 - START");
             lcd.setCursor(0,1);
             lcd.print("CONFIRMAR?");
             cod_anterior = 3;
         }
-        else if (codigo.equals("4")) {
+        else if (Car == "4") {
             lcd.print("4 - FIM");
             lcd.setCursor(0,1);
             lcd.print("CONFIRMAR?");
             cod_anterior = 4;
         }
         
-        else if (codigo.equals("5")) {
+        else if (Car == "5") {
             lcd.print("5 - TRANSF. DADOS");
             lcd.setCursor(0,1);
             lcd.print("CONFIRMAR?");
@@ -165,7 +235,7 @@ void confirmacao() {
 
     String temp;
 
-    if (codigo == '#') {
+    if (Car == '#') {
         switch (cod_anterior)
         {
         case 1:
@@ -214,7 +284,143 @@ void confirmacao() {
     }
 }
 
+// Função para o teclado matricial
+void teclado(){
 
+    // Alternância entre a linha acionada ocorre no tempo do laço 
+    switch (status_l){
+
+        case 0:
+            digitalWrite(L1, 1);
+            digitalWrite(L4, 0);
+            break;
+        case 1:
+            digitalWrite(L2, 1);
+            digitalWrite(L1, 0);
+            break;
+        case 2:
+            digitalWrite(L3, 1);
+            digitalWrite(L2, 0);
+            break;
+        case 3:
+            digitalWrite(L4, 1);
+            digitalWrite(L3, 0);
+            break;
+
+    }
+
+    // Armazenamento do estado atual de cada coluna da respectiva linha
+    d_C1 = digitalRead(C1);
+    d_C2 = digitalRead(C2);
+    d_C3 = digitalRead(C3);
+    
+    // A cada 4 ms checo se alguma coluna foi acionada
+    if(deb){
+
+        // Contador para estado sem botão pressionado 
+        cont_pres++;
+
+        // Zero a variável deb para ficar alternando e fazer a condição ser válida apenas a cada 4 ms
+        deb = 0;
+
+        // Faço contagem de vezes que tal coluna esteja em estado alto para usar como estratégica para o debounce
+        if(d_C1){
+            cont_c1++;
+        }else if(d_C2){
+            cont_c2++;
+        }else if(d_C3){
+            cont_c3++;
+        }
+
+        // Verifico se alguma das colunas ficou mais de 52 ms pressionada e converto o botão pressionado em seu caracter
+        // Zero o contador cont_pres, pois verificamos que algum botão foi pressionado
+        // Indico qual coluna foi verificada como em alto
+        // Zero as contagens de vezes que as colunas foram lidas como alta
+        // Faço a "tradução" da linha e coluna em um caracter
+
+        if(cont_c1 > 6){
+            cont_pres = 0;
+            status_c = 1;
+            cont_c1 = cont_c2 = cont_c3 = 0;
+            tradutor(status_l, status_c);
+        }else if(cont_c2 > 6){
+            cont_pres = 0;
+            status_c = 2;
+            cont_c1 = cont_c2 = cont_c3 = 0;
+            tradutor(status_l, status_c);
+        }else if(cont_c3 > 6){
+            cont_pres = 0;
+            status_c = 3;
+            cont_c1 = cont_c2 = cont_c3 = 0;
+            tradutor(status_l, status_c);
+        }
+        
+        // Esse último estado serve para após um tempo que ficar sem nenhum botão ser pressionado o microcontrolador identificar tal estado
+        // Esse estado serve para solucionar o problema de um botão ficar pressionado e printando no LCD
+        else if(cont_pres > 40){
+            cont_pres = 0;
+            status_c = 0;
+            tradutor(status_l, status_c);
+        }
+        
+    }
+    
+    // Mudo a posição da linha
+    status_l++;
+    if(status_l > 3) status_l = 0;
+
+}
+
+// Função para traduzir a leitura do botão para o caracter
+void tradutor(unsigned int lin, unsigned int col){
+
+    // Faço uma equação para gerar valores decimais unicos para cada digito do teclado
+    unsigned int fator = 10*lin + col;
+
+    switch (fator)
+    {
+    case 1:
+        Car = '1';
+        break;
+    case 2:
+        Car = '2';
+        break;
+    case 3:
+        Car = '3';
+        break;
+    case 11:
+        Car = '4';
+        break;
+    case 12:
+        Car = '5';
+        break;
+    case 13:
+        Car = '6';
+        break;
+    case 21:
+        Car = '7';
+        break;
+    case 22:
+        Car = '8';
+        break;
+    case 23:
+        Car = '9';
+        break;
+    case 31:
+        Car = '*';
+        break;
+    case 32:
+        Car = '0';
+        break;
+    case 33:
+        Car = '#';
+        break;
+    default:
+        Car = NULL;
+        break;
+    }
+
+}
 
 void temperatura(){
 
@@ -334,6 +540,9 @@ ISR(TIMER0_COMPA_vect){
 
     // Indico que passou o tempo do temporizador e que podemos enviar um novo dado via I2C e trocar o display
     troca = 1;
+
+    // Habilita checagem da coluna
+    deb = 1;
 
 }
 
