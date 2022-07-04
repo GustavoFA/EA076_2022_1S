@@ -179,10 +179,11 @@ void setup(){
     ponteiro[0] = Read(254, 87);
     ponteiro[1] = Read(255, 87);
 
-    dado_grav = 256*ponteiro[0] + ponteiro[1];
+    // Divido por 2 pois a cada 2 posições na memória correspondem a 1 dado gravado
+    dado_grav = (256*ponteiro[0] + ponteiro[1])/2;
 
-    Serial.println(ponteiro[0]);
-    Serial.println(ponteiro[1]);
+    //Serial.println(ponteiro[0]);
+    //Serial.println(ponteiro[1]);
     
 }
 
@@ -203,7 +204,7 @@ void loop(){
 
   if(ler_temp) temperatura();
 
-  salvar_dado();
+    maq_est_memoria();
 
   if(troca) visor(u, d, c, m);
 
@@ -223,7 +224,10 @@ void temperatura(){
     c = (int) (dado - 100*m)/10;
     d = (int) (dado - 100*m - 10*c);
 
-    if(escrita) estado = 1;
+    if(escrita) {
+      pode_escrever = 1;
+      estado = 1;
+    }
 
 }
 
@@ -255,7 +259,9 @@ void cont_mem(char par){
         // Zera ponteiros da memoria
         ponteiro[0] = ponteiro[1] = 0;
         dado_grav = 0;
-        //estado = 3;
+
+        estado = 5;
+        pode_escrever = 1;
 
     }
     // Caso em que devemos incrementar a memória (salvando algo nela)
@@ -635,6 +641,8 @@ void confirmacao() {
             lcd.print("TRANSF. DADOS");
             lcd.setCursor(0,1);
             lcd.print("QNTDE.: ");
+
+            
             // Faz transferencia de dados
             // Só volta a poder entrar quando acabar a ação do comando
             pode_entrar = 1;
@@ -669,15 +677,11 @@ ISR(TIMER0_COMPA_vect){
         cont_2s = 0;
     }
      
-    // Tempo para escrita do LSB de 8 ms
+    // Tempo para escrita do LSB de 16 ms
     // Essa condição ele entra
     //if((estado == 2) || (estado == 3) || (estado == 4)){
-      if(estado > 1){
+      if(pode_escrever){
         cont_escrita++;
-        if(cont_escrita > 1){
-            pode_escrever = 1;
-            cont_escrita = 0;
-        }
     }
 
     // Variável para habilitar a troca de display
@@ -690,57 +694,71 @@ ISR(TIMER0_COMPA_vect){
   Salva na sequência: MSB, LSB, posição da memória
  */
 
- // Testei diversas vezes e o que ocorre é: ele entra na máquina, mas só faz o estado 1. A variável de estado muda para 2, mas continua só ocorrendo o caso 1.
-void salvar_dado(){
+void maq_est_memoria(){
 
-    switch (estado)
-    {
-    case 0:
-        // Não faz nada
-        break;
+    if(estado == 1){
+
+        //Serial.println('1');
     
-    case 1:
-        // salvo o MSB
+      // salvo o MSB
         byte MSB = (byte) (dado >> 8);
         Write(ponteiro[1], ponteiro[0], MSB);
+        
+        estado++;
+        cont_escrita = 0;
+    }else if(estado == 2){
+      if(cont_escrita > 4){
+        //Serial.println('2');
         cont_mem('i');
-        estado = 2;
-        pode_escrever = 0;
+        estado++;
+        cont_escrita = 0;
+      }
+    }else if(estado == 3){
+      //Serial.println('3');
+      // salvo o LSB
+      byte LSB = (byte) (0x00FF & dado);
+      Write(ponteiro[1], ponteiro[0], LSB);
+      estado++;
+      cont_escrita = 0;
+    }else if(estado == 4){
+      if(cont_escrita > 4){
+        cont_mem('i');
+        dado_grav++;
+        estado++;
+        cont_escrita = 0;
+      }
+      
+    }else if(estado == 5){
+      //Serial.println('5');
+      Write(254, 87, ponteiro[0]);
+      estado++;
+      cont_escrita = 0;
+    }else if(estado == 6){
+      if(cont_escrita > 4){
         
-        break;
-
-    case 2:
-
-        if(pode_escrever){
-            // salvo o LSB
-            byte LSB = (byte) (0x00FF & dado);
-            Write(ponteiro[1], ponteiro[0], LSB);
-            cont_mem('i');
-            dado_grav++;
-            estado = 3;
-            pode_escrever = 0;
-            
-        }
-        break;
-
-    case 3:
-        if(pode_escrever){
-            Write(254, 87, ponteiro[0]);
-            estado = 4;
-            pode_escrever = 0;
-            
-        }
-        break;
-
-    case 4:
-        if(pode_escrever){
-            Write(255, 87, ponteiro[1]);
-            estado = 0;
-            pode_escrever = 0;
-            
-        }
-        break;
+        estado++;
+        cont_escrita = 0;
         
-    }
-
+      }
+    }else if(estado == 7){
+      //Serial.println('7');
+      Write(255, 87, ponteiro[1]);
+      estado++;
+      cont_escrita = 0;
+    }else if(estado == 8){
+      if(cont_escrita > 4){
+        estado++;
+        cont_escrita = 0;
+      }
+    }else if(estado == 9){
+      //Serial.println('9');
+      //zerar flag
+      pode_escrever = 0;
+      estado = 0;
+      cont_escrita = 0;
+    }        
+  
 }
+
+
+ 
