@@ -135,6 +135,15 @@ unsigned int dado;
 int cod_anterior = 0;
 
 
+// --- Leitura do teclado para quantidade --
+
+bool leit_quant = 0;
+String quanti;
+byte tam_quanti = 0;
+byte pos_print = 0;
+byte pag_print = 80;
+bool serial_pode = 0;
+
 // ------------------------------------------
 
 void setup(){
@@ -192,11 +201,17 @@ void loop(){
 
   teclado();
 
+  if(serial_pode) print_serial();
+
   // Caso tenha algum caracter pressionado diferente do ultimo visualizado
   if(Car != ult_char){
     // Implementar função do LCD aqui (no lugar do print)
     if(Car > 0){
-        primeira_leitura();
+        if(!leit_quant){
+          primeira_leitura();
+        }else{
+        segunda_leitura();
+        }
     }
     // Salvo o último valor printado
     ult_char = Car;
@@ -642,11 +657,8 @@ void confirmacao() {
             lcd.setCursor(0,1);
             lcd.print("QNTDE.: ");
 
+            leit_quant = 1;
             
-            // Faz transferencia de dados
-            // Só volta a poder entrar quando acabar a ação do comando
-            pode_entrar = 1;
-            cod_anterior = 0;
             break;
         }
     }
@@ -661,6 +673,75 @@ void confirmacao() {
         pode_entrar = 1;
         cod_anterior = 0;
     }
+}
+
+void print_serial(){
+
+  unsigned int TAM = quanti.toInt();
+
+  if(pos_print < TAM){
+
+    byte MSB_serial = Read(pos_print, pag_print);
+    pos_print++;
+    if(pos_print > 255){
+      pos_print = 0;
+      pag_print++;
+    }
+    byte LSB_serial = Read(pos_print, pag_print);
+
+    double local = (MSB_serial << 8)|(LSB_serial);
+
+    Serial.println(local);
+
+    
+  }else{
+
+    pag_print = 0;
+    pos_print = 0;
+    leit_quant = 0;
+    pode_entrar = 1;
+    cod_anterior = 0;
+    quanti.remove(0, tam_quanti);
+    tam_quanti = 0;
+    
+  }
+
+  
+
+  
+}
+
+void segunda_leitura(){
+
+  if(Car == '#'){
+
+    // executa o comando
+    serial_pode = 1;
+    
+  }else if(Car == '*'){
+
+    // cancela comando
+    // reseta variaveis
+
+    leit_quant = 0;
+    pode_entrar = 1;
+    cod_anterior = 0;
+
+    quanti.remove(0, tam_quanti);
+    tam_quanti = 0;
+    
+  }else{
+
+    
+     quanti =+ Car;
+     tam_quanti++;
+
+     lcd.setCursor(7 + tam_quanti, 1);
+     lcd.print(Car);
+     
+  }
+
+  
 }
 
 
