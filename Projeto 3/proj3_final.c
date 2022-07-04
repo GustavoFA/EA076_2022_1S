@@ -58,7 +58,7 @@ LiquidCrystal lcd(12, 11, 5, 7, 6, 8); // Definicao dos pinos que serao utilizad
 
 // ---------------------------
 
-
+// Habilita a leitura do sensor
 bool ler_temp = 0;
 
 // Contador de 2 segundos utilizado pelo sensor de temperatura
@@ -134,9 +134,6 @@ unsigned int dado;
 
 int cod_anterior = 0;
 
-// Variavel para informar que tem algum comando sendo executado
-bool exec_acao = 0;
-
 
 // ------------------------------------------
 
@@ -206,7 +203,7 @@ void loop(){
 
   if(ler_temp) temperatura();
 
-  salvar_dado(estado);
+  salvar_dado();
 
   if(troca) visor(u, d, c, m);
 
@@ -258,7 +255,7 @@ void cont_mem(char par){
         // Zera ponteiros da memoria
         ponteiro[0] = ponteiro[1] = 0;
         dado_grav = 0;
-        estado = 3;
+        //estado = 3;
 
     }
     // Caso em que devemos incrementar a memória (salvando algo nela)
@@ -491,13 +488,13 @@ void tradutor(unsigned int lin, unsigned int col){
         Car = '9';
         break;
     case 31:
-        Car = '#';
+        Car = '*';
         break;
     case 32:
         Car = '0';
         break;
     case 33:
-        Car = '*';
+        Car = '#';
         break;
     default:
         Car = NULL;
@@ -505,7 +502,6 @@ void tradutor(unsigned int lin, unsigned int col){
     }
 
 }
-
 
 // Função que decodifica a mensagem que foi enviada ao monitor, e para o caso de setar a velocidade, retorna o valor da velocidade
 void primeira_leitura() {
@@ -673,12 +669,12 @@ ISR(TIMER0_COMPA_vect){
         cont_2s = 0;
     }
      
-    // Tempo para escrita do LSB de 16 ms
+    // Tempo para escrita do LSB de 8 ms
     // Essa condição ele entra
     //if((estado == 2) || (estado == 3) || (estado == 4)){
       if(estado > 1){
         cont_escrita++;
-        if(cont_escrita > 2){
+        if(cont_escrita > 1){
             pode_escrever = 1;
             cont_escrita = 0;
         }
@@ -695,9 +691,9 @@ ISR(TIMER0_COMPA_vect){
  */
 
  // Testei diversas vezes e o que ocorre é: ele entra na máquina, mas só faz o estado 1. A variável de estado muda para 2, mas continua só ocorrendo o caso 1.
-void salvar_dado(byte ESTADO){
+void salvar_dado(){
 
-    switch (ESTADO)
+    switch (estado)
     {
     case 0:
         // Não faz nada
@@ -708,35 +704,40 @@ void salvar_dado(byte ESTADO){
         byte MSB = (byte) (dado >> 8);
         Write(ponteiro[1], ponteiro[0], MSB);
         cont_mem('i');
-        pode_escrever = 0;
         estado = 2;
+        pode_escrever = 0;
+        
         break;
 
     case 2:
+
         if(pode_escrever){
             // salvo o LSB
             byte LSB = (byte) (0x00FF & dado);
             Write(ponteiro[1], ponteiro[0], LSB);
             cont_mem('i');
             dado_grav++;
-            pode_escrever = 0;
             estado = 3;
+            pode_escrever = 0;
+            
         }
         break;
 
     case 3:
         if(pode_escrever){
             Write(254, 87, ponteiro[0]);
-            pode_escrever = 0;
             estado = 4;
+            pode_escrever = 0;
+            
         }
         break;
 
     case 4:
         if(pode_escrever){
             Write(255, 87, ponteiro[1]);
-            pode_escrever = 0;
             estado = 0;
+            pode_escrever = 0;
+            
         }
         break;
         
