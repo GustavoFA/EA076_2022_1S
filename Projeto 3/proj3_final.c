@@ -181,6 +181,11 @@ void setup(){
     // Verifico a posição da última memória disponível
     ponteiro[0] = Read(254, 87);
     ponteiro[1] = Read(255, 87);
+
+    dado_grav = 256*ponteiro[0] + ponteiro[1];
+
+    Serial.println(ponteiro[0]);
+    Serial.println(ponteiro[1]);
     
 }
 
@@ -208,6 +213,7 @@ void loop(){
 
 }
 
+// Função para medição da temperatura
 void temperatura(){
 
     ler_temp = 0;
@@ -230,7 +236,7 @@ void temperatura(){
  */
 
 // Função de escrita
-// Tempo de ciclo de escrita é de 5ms
+// Tempo de ciclo de escrita é de 5ms, mas estamos utilizando um tempo maior de 16 ms
 void Write(byte Add, byte pag, byte Data){
 
     if(dado_grav < 1022){
@@ -243,6 +249,8 @@ void Write(byte Add, byte pag, byte Data){
 
 }
 
+// Função para contabilizar e gerenciar as variáveis de controle da memória
+// Ela funciona
 void cont_mem(char par){
 
     // Caso em que devemos zerar a memória
@@ -251,14 +259,13 @@ void cont_mem(char par){
         ponteiro[0] = ponteiro[1] = 0;
         dado_grav = 0;
         estado = 3;
+
     }
     // Caso em que devemos incrementar a memória (salvando algo nela)
     else if(par == 'i'){
 
         // Caso continue salvando além do espaço disponível (começa a sobre escrever)
         if(dado_grav < 1022) {
-
-            dado_grav++;
 
             // Verifica se já atingiu limiar da pag
             if(ponteiro[1] >= 255){
@@ -270,6 +277,7 @@ void cont_mem(char par){
             }
 
         }
+
     }
 }
 
@@ -592,7 +600,7 @@ void confirmacao() {
             lcd.setCursor(0,1);
             lcd.print("DISPONIVEL: ");
             lcd.setCursor(12,1);
-            lcd.print((unsigned int) (1022 - dado_grav/2));
+            lcd.print((unsigned int) (1022 - dado_grav));
 
             pode_entrar = 1;
             cod_anterior = 0;
@@ -604,7 +612,9 @@ void confirmacao() {
 
             lcd.clear();
             lcd.setCursor(0,0);
-            lcd.print("INICIO COLETA");
+            lcd.print("INICIO DA");
+            lcd.setCursor(0,1);
+            lcd.print("COLETA DE TEMP.");
 
             pode_entrar = 1;
             cod_anterior = 0;
@@ -616,7 +626,9 @@ void confirmacao() {
 
             lcd.clear();
             lcd.setCursor(0,0);
-            lcd.print("FINALIZO COLETA");
+            lcd.print("COLETA DE TEMP.");
+            lcd.setCursor(0,1);
+            lcd.print("FINALIZADA");
   
             pode_entrar = 1;
             cod_anterior = 0;
@@ -661,10 +673,12 @@ ISR(TIMER0_COMPA_vect){
         cont_2s = 0;
     }
      
-    // Tempo para escrita do LSB de 8 ms
-    if((estado == 2) || (estado == 3) || (estado == 4)){
+    // Tempo para escrita do LSB de 16 ms
+    // Essa condição ele entra
+    //if((estado == 2) || (estado == 3) || (estado == 4)){
+      if(estado > 1){
         cont_escrita++;
-        if(cont_escrita > 1){
+        if(cont_escrita > 2){
             pode_escrever = 1;
             cont_escrita = 0;
         }
@@ -675,6 +689,12 @@ ISR(TIMER0_COMPA_vect){
 
 }
 
+// Máquina de estados finitos para armazenamento da memória 
+/*
+  Salva na sequência: MSB, LSB, posição da memória
+ */
+
+ // Testei diversas vezes e o que ocorre é: ele entra na máquina, mas só faz o estado 1. A variável de estado muda para 2, mas continua só ocorrendo o caso 1.
 void salvar_dado(byte ESTADO){
 
     switch (ESTADO)
@@ -688,6 +708,7 @@ void salvar_dado(byte ESTADO){
         byte MSB = (byte) (dado >> 8);
         Write(ponteiro[1], ponteiro[0], MSB);
         cont_mem('i');
+        pode_escrever = 0;
         estado = 2;
         break;
 
@@ -697,6 +718,7 @@ void salvar_dado(byte ESTADO){
             byte LSB = (byte) (0x00FF & dado);
             Write(ponteiro[1], ponteiro[0], LSB);
             cont_mem('i');
+            dado_grav++;
             pode_escrever = 0;
             estado = 3;
         }
