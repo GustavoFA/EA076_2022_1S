@@ -2,26 +2,21 @@
 // Gustavo Freitas Alves          236249
 // Jitesh Ashok Manilal Vassaram  175867
 
-/*
-    * Sensor de temperatura a cada 2s  (OK)
-    * Displays de 7 segmentos          (OK)
-    * LCD                              (OK)
-    * Teclado                          (OK)
-    * Memória
-    * Comandos
-
-*/
-
 // Usamos Timer 0 -> 4 ms
+
+/* Memoria
+ *  2048 endereços de 8 bits
+ *  3 paginas: 0x50 a 0x57 (80 a 87) + 8 bits(0 a 255)
+ */
 
 
 // Bibliotecas 
 #include <Wire.h>
 #include <LiquidCrystal.h>
 
-#define ADD 0x50    // 0101 0000 - ENDERECO DO 24c16
-#define Temp A0
+// ------ Defines -------------
 
+#define Temp A0
 #define L1 13
 #define L2 10
 #define L3 2
@@ -31,7 +26,9 @@
 #define C3 A1 
 
 // ----- Visor 7 segmentos -----
-unsigned int contDisplay = 0;      // Variavel de contagem utilizado para a multiplexacao dos displays de pedestre e de carros, fica intercalando entre um estado e outro a cada 16ms
+
+// Variavel de contagem utilizado para a multiplexacao dos displays de pedestre e de carros, fica intercalando entre um estado e outro a cada 16ms
+unsigned int contDisplay = 0;      
 
 // algarismos de unidade, dezena, centena e milhar
 int u = 0;
@@ -39,7 +36,9 @@ int d = 0;
 int c = 0;
 int m = 0;
 
-bool troca = 1; // variável auxiliar para comunição I2C ocorrer a cada interrupção do temporizador
+// variável auxiliar para comunição I2C ocorrer a cada interrupção do temporizador
+bool troca = 1; 
+
 // -------------------------------
 
 // ---- Display 16x2 ----
@@ -113,35 +112,45 @@ byte ponteiro[2]; // 0 = MSB e 1 = LSB
 // Vetor para endereço + dado
 byte vetor[2];
 
-// Variável para possibilitar que a escrita ocorra a cada 5 ms
+// Variável para temporizar a máquina de estados (16 ms)
 bool pode_escrever = 0;
 
-// Contador para tempo de espera de 8 ms para cada escrita
+// Contador para tempo de espera de 16 ms
 byte cont_escrita = 0;
 
-// Contador de dados gravados
+// Contador de dados gravados (conta cada temperatura foi gravado, ou seja, a cada 2 endereços alocados)
 unsigned int dado_grav = 0;
 
-// Permite escrita na memória
+// Permite escrita na memória e auxilia na temporização
 bool escrita = 0;
 
+// Variável para selecionar estado da Maq. de estados finitos
 byte estado = 0;
 
 // ---------------------------
 
-// Variavel da temperatura
+// Variavel da temperatura (16 bits)
 unsigned int dado;
 
+// Variável para auxiliar na seleção do comando
 int cod_anterior = 0;
 
-
-// --- Leitura do teclado para quantidade --
-
+// 
 bool leit_quant = 0;
+
+// Variável para determinar a quantidade de posições que serão lidas da memória
 String quanti;
+
+// Identifica quantos algarismos tem o valor inserido de quantidade
 byte tam_quanti = 0;
+
+// Contador para selecionar a posição da página que será lido e inserido na Serial
 byte pos_print = 0;
+
+// Contador para selecionar a pág que estará sendo lida para ser inserida na Serial
 byte pag_print = 80;
+
+// Habilita as impressões na Serial
 bool serial_pode = 0;
 
 // ------------------------------------------
@@ -189,27 +198,31 @@ void setup(){
     ponteiro[1] = Read(255, 87);
 
     // Divido por 2 pois a cada 2 posições na memória correspondem a 1 dado gravado
+    // Já atualizo o valor de dados gravados
     dado_grav = (256*ponteiro[0] + ponteiro[1])/2;
 
-    //Serial.println(ponteiro[0]);
-    //Serial.println(ponteiro[1]);
     
 }
 
 
 void loop(){
 
+  // Leitura do teclado (debounce incluso)
   teclado();
 
+  // Caso esteja habilitado para imprimir na Serial aqui será feito
   if(serial_pode) print_serial();
 
   // Caso tenha algum caracter pressionado diferente do ultimo visualizado
   if(Car != ult_char){
     // Implementar função do LCD aqui (no lugar do print)
     if(Car > 0){
+        // Caso o comando 5 não esteja selecionado
         if(!leit_quant){
           primeira_leitura();
-        }else{
+        }
+        // Caso o comando 5 seja selecionado
+        else{
         segunda_leitura();
         }
     }
@@ -217,10 +230,13 @@ void loop(){
     ult_char = Car;
   }
 
+  // Leitura de um valor da temperatura a cada 2s
   if(ler_temp) temperatura();
 
-    maq_est_memoria();
+  // Máquina de estado para armazenamento de dados na memória (incluso o ponteiro de posição)
+  maq_est_memoria();
 
+  // Alternância dos displays
   if(troca) visor(u, d, c, m);
 
 
@@ -229,16 +245,18 @@ void loop(){
 // Função para medição da temperatura
 void temperatura(){
 
+    // Zero variável para só ocorrer a leitura após 2s (RSI do temporizador)
     ler_temp = 0;
 
     // Obtenho o valor digital do sensor
     dado = analogRead(Temp);
 
-    // Obtenho cada digito sendo m dezena, c unidade, d decimo e u centesimo
+    // Obtenho cada digito sendo m dezena, c unidade e d decimo
     m = (int) (dado / 100);
     c = (int) (dado - 100*m)/10;
     d = (int) (dado - 100*m - 10*c);
 
+    // Escrita na memória resetando a cada 2s (caso permita tal ação)
     if(escrita) {
       pode_escrever = 1;
       estado = 1;
@@ -246,15 +264,14 @@ void temperatura(){
 
 }
 
-/* Memoria
- *  2048 endereços de 8 bits
- *  3 paginas: 0x50 a 0x57 (80 a 87) + 8 bits(0 a 255)
- */
+
 
 // Função de escrita
 // Tempo de ciclo de escrita é de 5ms, mas estamos utilizando um tempo maior de 16 ms
+// Parâmetros são respectivamente: Endereço (0 - 255), página (0x50 - 0x57 = 80 - 87) e Data = dado temp.
 void Write(byte Add, byte pag, byte Data){
 
+    // A memória não reseta sem o usuário permitir. Se atingir limite ela fica parada
     if(dado_grav < 1022){
         vetor[0] = Add;   // Byte de endereço
         vetor[1] = Data;  // Byte de dado
@@ -266,31 +283,34 @@ void Write(byte Add, byte pag, byte Data){
 }
 
 // Função para contabilizar e gerenciar as variáveis de controle da memória
-// Ela funciona
+// 2 controles: Zerar e Incrementar
 void cont_mem(char par){
 
     // Caso em que devemos zerar a memória
     if(par == 'z'){
         // Zera ponteiros da memoria
         ponteiro[0] = ponteiro[1] = 0;
+        // Zera variável de dados gravados
         dado_grav = 0;
 
+        // Estado 5 da Máq. de Estados corresponde à ação de guardar o ponteiro
         estado = 5;
+        // Habilito a escrita temporizada na memória
         pode_escrever = 1;
 
     }
     // Caso em que devemos incrementar a memória (salvando algo nela)
     else if(par == 'i'){
 
-        // Caso continue salvando além do espaço disponível (começa a sobre escrever)
+        // Para evitar a escrita em locais não indicados ou o reset da memória sem autorização do usuário
         if(dado_grav < 1022) {
 
-            // Verifica se já atingiu limiar da pag
+            // Verifica se já atingiu limiar da página
             if(ponteiro[1] >= 255){
                 ponteiro[0]++;
                 ponteiro[1] = 0;
             }else{
-                // Verifica se já atingiu limiar da memoria
+                
                 ponteiro[1]++;
             }
 
@@ -300,10 +320,10 @@ void cont_mem(char par){
 }
 
 // Função de leitura
-// pag: 80 a 87
-// Add: 0 a 255
+// Parâmetros semelhantes a função de escrita
 char Read(byte Add, byte pag){
 
+  // Variável local para armazenar valor lido
   char DATA;
 
   Wire.beginTransmission(pag); 
@@ -533,7 +553,8 @@ void primeira_leitura() {
         // Sinalizo que o último comando enviado já foi executado e está aguardando o próximo
         pode_entrar = 0;
 
-        // Verifica qual comando foi escrito no teclado, para enviar a UART sua respectiva mensagem (de erro ou nao)
+        // Condições seguintes identificam cada comando
+
         if (Car == '1') {
             lcd.clear();
             lcd.setCursor(0,0);
@@ -575,17 +596,21 @@ void primeira_leitura() {
             lcd.print("CONFIRMAR?");
             cod_anterior = 5;
         }else {
-            // Como o comando mandado não tem ele pode entrar novamente
+            // Caso o valor inserido não represente nenhum comando será habilitado que um próximo valor seja lido 
             pode_entrar = 1;
             
         }
     }else{
+        // Confirmações do comando 
         confirmacao();
     }
 }
 
+// Função para checar a confirmação/cancelamento do comando inserido
+// Responsável também pela execução de algumas ações ou de dar a partida para a resolução de alguns comandos
 void confirmacao() {
 
+    // Confirmação do comando
     if (Car == '#') {
         switch (cod_anterior)
         {
@@ -619,12 +644,13 @@ void confirmacao() {
             lcd.setCursor(12,1);
             lcd.print((unsigned int) (1022 - dado_grav));
 
+            // Reseto variáveis de controle
             pode_entrar = 1;
             cod_anterior = 0;
             break;
         case 3:
 
-            // Habilito para que a cada leitura seja armazenado o valor na memória
+            // Habilito para que a cada leitura da temperatura seja armazenado o valor na memória
             escrita = 1;
 
             lcd.clear();
@@ -633,6 +659,7 @@ void confirmacao() {
             lcd.setCursor(0,1);
             lcd.print("COLETA DE TEMP.");
 
+            // Reseto variáveis de controle
             pode_entrar = 1;
             cod_anterior = 0;
             break;
@@ -647,21 +674,25 @@ void confirmacao() {
             lcd.setCursor(0,1);
             lcd.print("FINALIZADA");
   
+            // Reseto variáveis de controle
             pode_entrar = 1;
             cod_anterior = 0;
             break;
         case 5:
+
             lcd.clear();
             lcd.setCursor(0,0);
             lcd.print("TRANSF. DADOS");
             lcd.setCursor(0,1);
             lcd.print("QNTDE.: ");
 
+            // Habilito a leitura da quantidade de dados que serão transf.
             leit_quant = 1;
             
             break;
         }
     }
+    // Cancelamento
     else if (Car == '*') {
         lcd.clear();
         lcd.setCursor(0,0);
@@ -669,33 +700,47 @@ void confirmacao() {
         lcd.setCursor(0,1);
         lcd.print("DIGITE A FUNCAO:");
         
-
+        // Reseto variáveis de controle
         pode_entrar = 1;
         cod_anterior = 0;
     }
 }
 
+// Função para impressão na Serial
 void print_serial(){
 
-  unsigned int TAM = quanti.toInt();
+  // Conversão da String com os caracteres que representam a quantidade de dados desejados
+  unsigned int TAM = quanti.toInt(); // String para int
 
+  // Condição para quantidade desejada
   if(pos_print < TAM){
 
-    byte MSB_serial = Read(pos_print, pag_print);
+    // Armazeno o MSB do dado
+    byte MSB_serial;
+    MSB_serial = Read(pos_print, pag_print);
+    
+    // Passo para a próxima posição tomando cuidado com o limite da página
     pos_print++;
     if(pos_print > 255){
       pos_print = 0;
       pag_print++;
     }
-    byte LSB_serial = Read(pos_print, pag_print);
+    
+    // Armazeno o LSB do dado
+    byte LSB_serial;
+    LSB_serial = Read(pos_print, pag_print);
 
-    double local = (MSB_serial << 8)|(LSB_serial);
+    // Concateno os valores armazenados de LSB e MSB 
+    unsigned int local;
+    local = (unsigned int) (MSB_serial << 8)|(LSB_serial);
 
-    Serial.println(local);
+    // Imprimo na Serial com a quebra de linha
+    Serial.println(local, DEC);
 
     
   }else{
 
+    // Caso tenha impresso os dados das posições desejadas reseto as variáveis
     pag_print = 0;
     pos_print = 0;
     leit_quant = 0;
@@ -711,17 +756,19 @@ void print_serial(){
   
 }
 
+// Função para checagem do comando 5
 void segunda_leitura(){
 
+  // Verifico a confirmação da quantidade
   if(Car == '#'){
 
-    // executa o comando
+    // Executo o comando com a quantidade já armazenada
     serial_pode = 1;
     
-  }else if(Car == '*'){
+  }
+  // Cancelo o comando resetando as variáveis
+  else if(Car == '*'){
 
-    // cancela comando
-    // reseta variaveis
 
     leit_quant = 0;
     pode_entrar = 1;
@@ -730,12 +777,17 @@ void segunda_leitura(){
     quanti.remove(0, tam_quanti);
     tam_quanti = 0;
     
-  }else{
+  }
+  // Enquanto não houver confirmação ou cancelamento verifico a entrada de algum valor para representar a quantidade
+  else{
 
-    
+     // Armazeno no vetor de caracteres
      quanti =+ Car;
+
+     // Guardo a quantidade de caracteres
      tam_quanti++;
 
+     // Imprimo no LCD para facilitar a visualização para o usuário
      lcd.setCursor(7 + tam_quanti, 1);
      lcd.print(Car);
      
@@ -758,9 +810,7 @@ ISR(TIMER0_COMPA_vect){
         cont_2s = 0;
     }
      
-    // Tempo para escrita do LSB de 16 ms
-    // Essa condição ele entra
-    //if((estado == 2) || (estado == 3) || (estado == 4)){
+    // Tempo para escrita de 16 ms
       if(pode_escrever){
         cont_escrita++;
     }
@@ -771,50 +821,54 @@ ISR(TIMER0_COMPA_vect){
 }
 
 // Máquina de estados finitos para armazenamento da memória 
-/*
-  Salva na sequência: MSB, LSB, posição da memória
- */
-
+//Salva na sequência: MSB, LSB, posição da memória
 void maq_est_memoria(){
 
     if(estado == 1){
-
-        //Serial.println('1');
     
-      // salvo o MSB
+      // Salva o MSB
         byte MSB = (byte) (dado >> 8);
         Write(ponteiro[1], ponteiro[0], MSB);
         
+        // Passa para o próximo estado
         estado++;
+        // Zera contador do temporizador para assim esperar 16 ms para próxima escrita
         cont_escrita = 0;
     }else if(estado == 2){
       if(cont_escrita > 4){
-        //Serial.println('2');
+        // Incremento no contador de posição
         cont_mem('i');
         estado++;
         cont_escrita = 0;
       }
     }else if(estado == 3){
-      //Serial.println('3');
-      // salvo o LSB
+
+      // Salva o LSB
       byte LSB = (byte) (0x00FF & dado);
       Write(ponteiro[1], ponteiro[0], LSB);
+
       estado++;
+      // Espera de 16 ms
       cont_escrita = 0;
     }else if(estado == 4){
       if(cont_escrita > 4){
+        // Incremento da posição
         cont_mem('i');
+        // Registro que houve a adição de um dado na memória (corresponde ao uso de 2 posições)
         dado_grav++;
+
         estado++;
         cont_escrita = 0;
       }
       
     }else if(estado == 5){
-      //Serial.println('5');
+      // Escrita do ponteiro MSB
       Write(254, 87, ponteiro[0]);
+
       estado++;
       cont_escrita = 0;
     }else if(estado == 6){
+      // Espera de 16 ms
       if(cont_escrita > 4){
         
         estado++;
@@ -822,18 +876,20 @@ void maq_est_memoria(){
         
       }
     }else if(estado == 7){
-      //Serial.println('7');
+      // Escrita do ponteiro LSB
       Write(255, 87, ponteiro[1]);
+
       estado++;
       cont_escrita = 0;
     }else if(estado == 8){
+      // Espera de 16ms
       if(cont_escrita > 4){
         estado++;
         cont_escrita = 0;
       }
     }else if(estado == 9){
-      //Serial.println('9');
-      //zerar flag
+
+      // Zero variáveis e reseto a máquina de estado (só voltará para o estado inicial com a flag gerado na função de temperatura)
       pode_escrever = 0;
       estado = 0;
       cont_escrita = 0;
