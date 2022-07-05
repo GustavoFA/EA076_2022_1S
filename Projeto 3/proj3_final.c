@@ -139,10 +139,10 @@ int cod_anterior = 0;
 bool leit_quant = 0;
 
 // Variável para determinar a quantidade de posições que serão lidas da memória
-String quanti;
+char quanti[4];
 
 // Identifica quantos algarismos tem o valor inserido de quantidade
-byte tam_quanti = 0;
+int tam_quanti = 0;
 
 // Contador para selecionar a posição da página que será lido e inserido na Serial
 byte pos_print = 0;
@@ -152,6 +152,9 @@ byte pag_print = 80;
 
 // Habilita as impressões na Serial
 bool serial_pode = 0;
+
+// 
+unsigned int valor_final_alg;
 
 // ------------------------------------------
 
@@ -250,6 +253,7 @@ void temperatura(){
 
     // Obtenho o valor digital do sensor
     dado = analogRead(Temp);
+
 
     // Obtenho cada digito sendo m dezena, c unidade e d decimo
     m = (int) (dado / 100);
@@ -709,11 +713,8 @@ void confirmacao() {
 // Função para impressão na Serial
 void print_serial(){
 
-  // Conversão da String com os caracteres que representam a quantidade de dados desejados
-  unsigned int TAM = quanti.toInt(); // String para int
-
   // Condição para quantidade desejada
-  if(pos_print < TAM){
+  if(pos_print < valor_final_alg){
 
     // Armazeno o MSB do dado
     byte MSB_serial;
@@ -735,18 +736,18 @@ void print_serial(){
     local = (unsigned int) (MSB_serial << 8)|(LSB_serial);
 
     // Imprimo na Serial com a quebra de linha
-    Serial.println(local, DEC);
+    Serial.println(local);
 
     
   }else{
 
     // Caso tenha impresso os dados das posições desejadas reseto as variáveis
-    pag_print = 0;
+    serial_pode = 0;
+    pag_print = 80;
     pos_print = 0;
     leit_quant = 0;
     pode_entrar = 1;
     cod_anterior = 0;
-    quanti.remove(0, tam_quanti);
     tam_quanti = 0;
     
   }
@@ -763,18 +764,57 @@ void segunda_leitura(){
   if(Car == '#'){
 
     // Executo o comando com a quantidade já armazenada
-    serial_pode = 1;
+    
+
+    unsigned int alg_aux[4];
+
+    // Conversão dos caracteres em um valor inteiro
+    for(int i = 0; i < tam_quanti; i++){
+      alg_aux[i] = quanti[i] - 48;
+    }
+
+    if(tam_quanti == 1){
+      valor_final_alg = alg_aux[0];
+      serial_pode = 1;
+    }else if(tam_quanti == 2){
+      valor_final_alg = alg_aux[0]*10 + alg_aux[1];
+      serial_pode = 1;
+    }else if(tam_quanti == 3){
+      valor_final_alg = alg_aux[0]*100 + alg_aux[1]*10 + alg_aux[2];
+      serial_pode = 1;
+    }else if(tam_quanti == 4){
+      valor_final_alg = alg_aux[0]*1000 + alg_aux[1]*100 + alg_aux[2]*10 + alg_aux[3];
+      serial_pode = 1;
+    }else{
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print("VALOR INVALIDO");
+      lcd.setCursor(0,1);
+      lcd.print("DIGITE A FUNCAO:");
+  
+  
+      leit_quant = 0;
+      pode_entrar = 1;
+      cod_anterior = 0;
+  
+      tam_quanti = 0;
+    }
     
   }
   // Cancelo o comando resetando as variáveis
   else if(Car == '*'){
+
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("CANCELADO");
+    lcd.setCursor(0,1);
+    lcd.print("DIGITE A FUNCAO:");
 
 
     leit_quant = 0;
     pode_entrar = 1;
     cod_anterior = 0;
 
-    quanti.remove(0, tam_quanti);
     tam_quanti = 0;
     
   }
@@ -782,7 +822,7 @@ void segunda_leitura(){
   else{
 
      // Armazeno no vetor de caracteres
-     quanti =+ Car;
+     quanti[tam_quanti] = Car;
 
      // Guardo a quantidade de caracteres
      tam_quanti++;
@@ -844,7 +884,7 @@ void maq_est_memoria(){
     }else if(estado == 3){
 
       // Salva o LSB
-      byte LSB = (byte) (0x00FF & dado);
+      byte LSB = (byte) (0x00FF)&(dado);
       Write(ponteiro[1], ponteiro[0], LSB);
 
       estado++;
