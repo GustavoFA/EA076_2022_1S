@@ -188,7 +188,6 @@ void setup(){
 }
 
 void loop(){
-
   // Leitura do teclado (debounce incluso)
   teclado();
 
@@ -214,7 +213,7 @@ void loop(){
 
     endereco = 0;
     pagina = 80;
-    if(endereco<0xFF && sair == 0) {
+    if(endereco<0xFF && sair == 0 && ler_temp == 1) {
         Write(endereco, pagina, num);
         //Read(t);
         endereco++;
@@ -760,5 +759,10 @@ ISR(TIMER0_COMPA_vect){
 
     // Variável para habilitar a troca de display
     troca = 1;
-
+    cont_2s++;
+    if(cont_2s >= 2){
+        ler_temp = 1;
+        cont_2s = 0;
+    }
 }
+
