@@ -107,9 +107,9 @@ byte estado = 1;
 
 // Variavel da temperatura (16 bits)
 unsigned int dado;
-byte endereco;
-byte pagina;
-char num = 33;
+byte endereco = 0;
+byte pagina = 80;
+unsigned int num = 0x0103;
 
 // Variável para auxiliar na seleção do comando
 int cod_anterior = 0;
@@ -132,7 +132,9 @@ byte pag_print = 80;
 // Habilita as impressões na Serial
 bool serial_pode = 0;
 bool sair = 0;
-
+byte MSB;
+byte LSB;
+unsigned int local;
 // 
 unsigned int valor_final_alg;
 
@@ -179,8 +181,8 @@ void setup(){
     // Verifico a posição da última memória disponível
     ponteiro[0] = Read(254, 87);
     ponteiro[1] = Read(255, 87);
-    Serial.println(ponteiro[0]);
-    Serial.println(ponteiro[1]);
+    //Serial.println(ponteiro[0]);
+    //Serial.println(ponteiro[1]);
 
     // Divido por 2 pois a cada 2 posições na memória correspondem a 1 dado gravado
     // Já atualizo o valor de dados gravados
@@ -189,13 +191,13 @@ void setup(){
 
 void loop(){
   // Leitura do teclado (debounce incluso)
-  teclado();
+  //teclado();
 
   // Caso esteja habilitado para imprimir na Serial aqui será feito
-  if(serial_pode) print_serial();
+  //if(serial_pode) print_serial();
 
   // Caso tenha algum caracter pressionado diferente do ultimo visualizado
-  if(Car != ult_char){
+  /*if(Car != ult_char){
     // Implementar função do LCD aqui (no lugar do print)
     if(Car > 0){
         // Caso o comando 5 não esteja selecionado
@@ -209,21 +211,42 @@ void loop(){
     }
     // Salvo o último valor printado
     ult_char = Car;
-  }
+  }*/
 
-    endereco = 0;
-    pagina = 80;
-    if(endereco<0xFF && sair == 0 && ler_temp == 1) {
-        Write(endereco, pagina, num);
-        //Read(t);
+    
+    if(endereco<0x01) {
+        MSB = num >> 8;
+        LSB = (byte) (num & (0x00FF));
+        Serial.println(MSB);
+        Serial.println(LSB);
+        Write(endereco, pagina, MSB);
+        _delay_ms(10);
         endereco++;
-        num++;
+        Write(endereco,pagina, LSB);
+        //Serial.println('Fiz o Write');
+        _delay_ms(5);
+        //MSB = Read(endereco, pagina);
+        //Serial.println(MSB);
+        Serial.println("Fiz o Read");
+        endereco++;
     }
     else {
-        escrita = 0;
-        endereco = 0;
-        sair = 1;
+      if (pos_print < endereco) {
+          byte aux;
+          byte aux2;
+          aux = Read(pos_print, pagina);
+          Serial.println(aux);
+          pos_print++;
+          aux2 = Read(pos_print, pagina);
+          Serial.println(aux2);
+          local = ((aux <<8)|aux2);
+          Serial.println(local, HEX);
+          pos_print++;
+      }
     }
+    _delay_ms(500);
+    /*
+    }*/
 }
 
 // Tempo de ciclo de escrita é de 5ms, mas estamos utilizando um tempo maior de 16 ms
@@ -613,20 +636,20 @@ void print_serial(){
     }
     
     // Armazeno o LSB do dado
-    byte LSB_serial;
+    /*byte LSB_serial;
     LSB_serial = Read(pos_print, pag_print);
     Serial.println(LSB_serial);
     pos_print++;
     if(pos_print > 255){
       pos_print = 0;
       pag_print++;
-    }
+    }*/
     // Concateno os valores armazenados de LSB e MSB 
     unsigned int local;
-    local = (unsigned int) ((MSB_serial << 8)|(LSB_serial));
+    local = (char) (MSB_serial);
    
     // Imprimo na Serial com a quebra de linha
-    Serial.println(local*0.1  , DEC);
+    Serial.println(local);
     //MSB_serial = 0;
     //LSB_serial = 0;
     local = 0;
@@ -765,4 +788,3 @@ ISR(TIMER0_COMPA_vect){
         cont_2s = 0;
     }
 }
-
