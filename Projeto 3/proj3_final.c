@@ -277,10 +277,12 @@ void Write(byte Add, byte pag, byte Data){
 
     // A memória não reseta sem o usuário permitir. Se atingir limite ela fica parada
     if(dado_grav < 1022){
-        vetor[0] = Add;   // Byte de endereço
-        vetor[1] = Data;  // Byte de dado
+        //vetor[0] = Add;   // Byte de endereço
+        //vetor[1] = Data;  // Byte de dado
         Wire.beginTransmission(pag);
-        Wire.write(vetor,2);
+        //Wire.write(vetor,2);
+        Wire.write(Add);
+        Wire.write(Data);
         Wire.endTransmission();
     }
 
@@ -293,7 +295,8 @@ void cont_mem(char par){
     // Caso em que devemos zerar a memória
     if(par == 'z'){
         // Zera ponteiros da memoria
-        ponteiro[0] = ponteiro[1] = 0;
+        ponteiro[0] = 80;
+        ponteiro[1] = 0;
         // Zera variável de dados gravados
         dado_grav = 0;
 
@@ -714,7 +717,7 @@ void confirmacao() {
 void print_serial(){
 
   // Condição para quantidade desejada
-  if(pos_print < valor_final_alg){
+  if(pos_print < 2*valor_final_alg){
 
     // Armazeno o MSB do dado
     byte MSB_serial;
@@ -733,7 +736,13 @@ void print_serial(){
 
     // Concateno os valores armazenados de LSB e MSB 
     unsigned int local;
-    local = (unsigned int) (MSB_serial << 8)|(LSB_serial);
+    local = (MSB_serial << 8)|(LSB_serial);
+
+    pos_print++;
+    if(pos_print > 255){
+      pos_print = 0;
+      pag_print++;
+    }
 
     // Imprimo na Serial com a quebra de linha
     Serial.println(local);
@@ -867,7 +876,8 @@ void maq_est_memoria(){
     if(estado == 1){
     
       // Salva o MSB
-        byte MSB = (byte) (dado >> 8);
+        //byte MSB = (byte) (dado >> 8); // Dessa forma ele da prioridade em fazer primeiro o cast e depois o deslocamento
+        byte MSB = (dado >> 8);
         Write(ponteiro[1], ponteiro[0], MSB);
         
         // Passa para o próximo estado
@@ -884,7 +894,7 @@ void maq_est_memoria(){
     }else if(estado == 3){
 
       // Salva o LSB
-      byte LSB = (byte) (0x00FF)&(dado);
+      byte LSB = (0x00FF)&(dado);
       Write(ponteiro[1], ponteiro[0], LSB);
 
       estado++;
