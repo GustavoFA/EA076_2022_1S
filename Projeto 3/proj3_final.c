@@ -202,7 +202,7 @@ void setup(){
 
     // Divido por 2 pois a cada 2 posições na memória correspondem a 1 dado gravado
     // Já atualizo o valor de dados gravados
-    dado_grav = (256*ponteiro[0] + ponteiro[1])/2;
+    dado_grav = (256*(ponteiro[0]-80) + ponteiro[1])/2;
 
     
 }
