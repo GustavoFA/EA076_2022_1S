@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2022-07-10T23:48:08.336Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36" etag="J0c7jtPmHIBjzwHK84kk" version="20.0.3" type="github">
+<mxfile host="app.diagrams.net" modified="2022-07-10T23:52:44.918Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36" etag="yKHTb-ZahCq1R4mwIHcB" version="20.0.3" type="github">
   <diagram id="nNss5Dn10yEGMCoMhRai" name="Page-1">
-    <mxGraphModel dx="2480" dy="1377" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1335" dy="742" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -182,6 +182,33 @@
         </mxCell>
         <mxCell id="mJ9_D8mVwsy7jP1Pi1d4-42" value="LOOP" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=15;" vertex="1" parent="1">
           <mxGeometry x="260" y="615" width="70" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="mJ9_D8mVwsy7jP1Pi1d4-48" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=15;" edge="1" parent="1" source="mJ9_D8mVwsy7jP1Pi1d4-44" target="mJ9_D8mVwsy7jP1Pi1d4-45">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mJ9_D8mVwsy7jP1Pi1d4-44" value="Habilita variável para leitura das colunas" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="95.53" y="770" width="130" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="mJ9_D8mVwsy7jP1Pi1d4-49" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=15;" edge="1" parent="1" source="mJ9_D8mVwsy7jP1Pi1d4-45" target="mJ9_D8mVwsy7jP1Pi1d4-46">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mJ9_D8mVwsy7jP1Pi1d4-45" value="Incrementa contador de 2 segundos para leitura da temperatura" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="95.53" y="880" width="130" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="mJ9_D8mVwsy7jP1Pi1d4-50" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=15;" edge="1" parent="1" source="mJ9_D8mVwsy7jP1Pi1d4-46" target="mJ9_D8mVwsy7jP1Pi1d4-47">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mJ9_D8mVwsy7jP1Pi1d4-46" value="Incrementa contador para escrita de 16 ms" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="95.53" y="990" width="130" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="mJ9_D8mVwsy7jP1Pi1d4-47" value="Habilita troca do display" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="95.53" y="1099" width="130" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="mJ9_D8mVwsy7jP1Pi1d4-51" value="" style="shape=curlyBracket;whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="65.53" y="770" width="20" height="390" as="geometry" />
+        </mxCell>
+        <mxCell id="mJ9_D8mVwsy7jP1Pi1d4-52" value="RSI" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="15.53" y="950" width="50" height="30" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
